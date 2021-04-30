@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">STEAUC</string>
+    <string name="start">Start</string>
+    <string name="menu_title">Menu</string>
+    <string name="settings">Settings</string>
+    <string name="defaultText">Default Text</string>
+    <string name="BLEScan">BLE Scan</string>
+    <string name="BLEScan_pauseTitle">Scanning...</string>
+    <string name="BLEScan_playTitle">Launch scan</string>
+    <string name="scene_title">Scene</string>
+</resources>
