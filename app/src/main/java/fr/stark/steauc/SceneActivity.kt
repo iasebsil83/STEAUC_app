@@ -35,4 +35,6 @@ class SceneActivity : AppCompatActivity() {
         //display device info
         findViewById<TextView>(R.id.ble_device_name).text = deviceInfo
     }
+
+    //
 }
