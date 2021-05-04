@@ -21,11 +21,12 @@
         android:id="@+id/ble_scan_title"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginStart="64dp"
+        android:layout_marginStart="48dp"
         android:layout_marginTop="45dp"
-        android:layout_marginEnd="64dp"
+        android:layout_marginEnd="80dp"
         android:layout_marginBottom="45dp"
-        android:background="#3D7FC8"
+        android:background="#522A5E"
+        android:gravity="center_horizontal"
         android:text="@string/ble_scan_play_title"
         android:textAlignment="center"
         android:textColor="#FFFFFF"
@@ -34,13 +35,12 @@
         app:layout_constraintBottom_toTopOf="@+id/ble_scan_rec_view"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:gravity="center_horizontal" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageButton
         android:id="@+id/ble_launch_scan"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="59dp"
+        android:layout_height="59dp"
         android:background="#00FFFFFF"
         app:layout_constraintBottom_toTopOf="@+id/ble_scan_rec_view"
         app:layout_constraintEnd_toEndOf="parent"

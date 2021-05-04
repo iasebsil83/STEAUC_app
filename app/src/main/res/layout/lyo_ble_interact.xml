@@ -5,43 +5,33 @@
     android:id="@+id/ble_device_info_global"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#95683F"
+    android:background="#7D3B80"
     tools:context=".ble.BLEInteractActivity">
-
-    <View
-        android:id="@+id/ble_interact_bg"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="#E6AF57"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/ble_device_status"
-        app:layout_constraintVertical_bias="0.0" />
 
     <TextView
         android:id="@+id/ble_device_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
         android:text="@string/no_device"
         android:textAlignment="center"
         android:textAllCaps="false"
         android:textColor="#FFFFFF"
         android:textSize="30sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/ble_device_status"
+        app:layout_constraintBottom_toTopOf="@+id/ble_interact_bg"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.505"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.148"
-        android:gravity="center_horizontal" />
+        app:layout_constraintVertical_bias="0.181" />
 
     <TextView
         android:id="@+id/ble_device_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="#8188BBF1"
+        android:gravity="center_horizontal"
         android:paddingLeft="22dp"
         android:paddingTop="5dp"
         android:paddingRight="22dp"
@@ -50,18 +40,16 @@
         android:textAlignment="center"
         android:textColor="#FFFFFF"
         android:textSize="24sp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/ble_interact_bg"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.086"
-        android:gravity="center_horizontal" />
+        app:layout_constraintTop_toBottomOf="@+id/ble_device_name" />
 
     <View
         android:id="@+id/ble_device_status_bg"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="@drawable/ble_cell"
+        android:background="@drawable/dark_purple_border"
         app:layout_constraintBottom_toBottomOf="@+id/ble_device_status"
         app:layout_constraintEnd_toEndOf="@+id/ble_device_status"
         app:layout_constraintHorizontal_bias="1.0"
@@ -69,14 +57,25 @@
         app:layout_constraintTop_toTopOf="@+id/ble_device_status"
         app:layout_constraintVertical_bias="0.0" />
 
+    <View
+        android:id="@+id/ble_interact_bg"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="#59565C"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/ble_services_rec_view" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/ble_services_rec_view"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="128dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/ble_device_status" />
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

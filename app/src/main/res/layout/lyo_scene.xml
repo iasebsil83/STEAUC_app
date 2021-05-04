@@ -12,6 +12,7 @@
         android:id="@+id/scene_ble_interact_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="672dp"
         android:text="@string/ble_interact_button_title"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

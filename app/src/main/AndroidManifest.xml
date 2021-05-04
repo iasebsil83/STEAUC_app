@@ -34,8 +34,8 @@
         <activity android:name=".ble.BLEInteractActivity" />
 
         <!-- scene -->
-        <activity android:name=".SceneActivity"
-            android:theme="@style/Theme.STEAUC.NoActionBar" />
+        <activity android:name=".SceneActivity"/>
+
     </application>
 
 </manifest>
