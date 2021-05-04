@@ -5,10 +5,13 @@ import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.view.*
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import com.thoughtbot.expandablerecyclerview.ExpandableRecyclerViewAdapter
 import com.thoughtbot.expandablerecyclerview.models.ExpandableGroup
@@ -24,14 +27,18 @@ import fr.stark.steauc.log.Error
 
 
 
+
+
 class BLEServiceAdapter(
-        private val gatt: BluetoothGatt?,
-        private val serviceList: MutableList<BLEService>,
-        private val context: Context
+    private val gatt: BluetoothGatt?,
+    private val serviceList: MutableList<BLEService>,
+    private val context: Context
 ) : ExpandableRecyclerViewAdapter<
         BLEServiceAdapter.ServiceViewHolder,
         BLEServiceAdapter.CharacteristicViewHolder
->(serviceList) {
+        >(serviceList) {
+
+
 
 
 
@@ -45,6 +52,8 @@ class BLEServiceAdapter(
 
     //notification subscription
     private var enabled : Boolean = false
+
+
 
 
 
@@ -79,6 +88,8 @@ class BLEServiceAdapter(
 
 
 
+
+
     //VIEW HOLDERS
 
     //parent
@@ -95,8 +106,8 @@ class BLEServiceAdapter(
 
     //child
     override fun onCreateChildViewHolder(
-            parent: ViewGroup,
-            viewType: Int
+        parent: ViewGroup,
+        viewType: Int
     ) : CharacteristicViewHolder =
         CharacteristicViewHolder(
             LayoutInflater.from(parent.context).inflate(
@@ -111,13 +122,15 @@ class BLEServiceAdapter(
 
 
 
+
+
     //BIND
 
     //parent
     override fun onBindGroupViewHolder(
-            holder: ServiceViewHolder,
-            flatPosition: Int,
-            group: ExpandableGroup<*>
+        holder: ServiceViewHolder,
+        flatPosition: Int,
+        group: ExpandableGroup<*>
     ) {
         val title = BLEUUIDAttribute.getBLEAttributeFromUUID(group.title).title
         holder.serviceName.text = title
@@ -129,10 +142,10 @@ class BLEServiceAdapter(
     //child
     @SuppressLint("SetTextI18n")
     override fun onBindChildViewHolder(
-            holder: CharacteristicViewHolder,
-            flatPosition: Int,
-            group: ExpandableGroup<*>,
-            childIndex: Int
+        holder: CharacteristicViewHolder,
+        flatPosition: Int,
+        group: ExpandableGroup<*>,
+        childIndex: Int
     ) {
         info.setFunctionName("onBindChildViewHolder")
         val characteristic: BluetoothGattCharacteristic = (group as BLEService).items[childIndex]
@@ -173,41 +186,12 @@ class BLEServiceAdapter(
 
         //read
         holder.characteristicReadAction.setOnClickListener {
-            val result = gatt?.readCharacteristic(characteristic)
-
-            //debug
-            err.log(false, "${result.toString()}")
-            msg.log("uid : ${characteristic.uuid.toString()}")
-
-            //display read info
-            if (characteristic.value != null) {
-                holder.characteristicValue.text = "value : ${String(characteristic.value)}"
-            }
+            this.readData(holder, characteristic)
         }
 
         //write
         holder.characteristicWriteAction.setOnClickListener {
-            val alertDialog = AlertDialog.Builder(context)
-            val editView = View.inflate(context, R.layout.popup_write, null)
-
-            //dialog popup settings
-            alertDialog.setView(editView)
-            alertDialog.setPositiveButton("Done") { _, _ ->
-
-                //get what user has input
-                characteristic.value = editView.findViewById<EditText>(R.id.popup).text.toString().toByteArray()
-
-                //send it through BLE
-                var potentialError = gatt?.writeCharacteristic(characteristic).toString()
-                err.log(false, potentialError)
-
-                // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< READ ? <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-                potentialError = gatt?.readCharacteristic(characteristic).toString()
-                err.log(false, potentialError)
-            }
-            alertDialog.setNegativeButton("Cancel") { alertDialog, _ -> alertDialog.cancel() }
-            alertDialog.create()
-            alertDialog.show()
+            this.writeData(characteristic)
         }
 
         //notify
@@ -227,7 +211,7 @@ class BLEServiceAdapter(
                 enabled = true
                 gatt?.setCharacteristicNotification(characteristic, true)
 
-                //for each descriptors
+                //for each descriptors ? <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
                 for(desc in characteristic.descriptors) {
 
                     //check if notification is part of the service properties
@@ -258,28 +242,61 @@ class BLEServiceAdapter(
 
         //DATA TRANSFERS
 
-        //debug
-        msg.log("UUID 1 : ${characteristic.uuid.toString()}")
-        msg.log("UUID 2 : ${BLEUUIDAttribute.getBLEAttributeFromUUID( characteristic.uuid.toString() ).uuid}")
+        //receive data
+        this.readData(holder, characteristic)
+    }
 
-        //select by UUID
-        if(
-            characteristic.uuid.toString() == BLEUUIDAttribute.getBLEAttributeFromUUID( characteristic.uuid.toString() ).uuid &&
-            enabled
-        ) {
-            //received incorrect value
-            if(characteristic.value == null){
-                msg.log("Notification [null] received.")
-                holder.characteristicValue.text = "Value : null"
-            }
 
-            //received correct value
-            else {
-                msg.log("Notification [${characteristic.value.toString()}] received.")
-                holder.characteristicValue.text = "Value : ${byteArrayToHexString(characteristic.value)}"
-            }
+
+
+
+
+
+
+    //BLE BASICS
+
+    //read
+    private fun readData(
+        holder         : BLEServiceAdapter.CharacteristicViewHolder,
+        characteristic : BluetoothGattCharacteristic
+    ){
+        //get data
+        gatt?.readCharacteristic(characteristic)
+
+        //display read info
+        if (characteristic.value != null) {
+            msg.log("Received data : ${String(characteristic.value)}")
+            holder.characteristicValue.text = "value : ${String(characteristic.value)}"
         }
     }
+
+
+
+    //write
+    private fun writeData(
+        characteristic : BluetoothGattCharacteristic
+    ){
+
+        //get layout elements
+        val alertDialog = AlertDialog.Builder(context)
+        val editView = View.inflate(context, R.layout.popup_write, null)
+
+        //dialog popup settings
+        alertDialog.setView(editView)
+        alertDialog.setPositiveButton("Done") { _, _ ->
+
+            //get what user has input
+            characteristic.value = editView.findViewById<EditText>(R.id.popup).text.toString().toByteArray()
+
+            //send it through BLE
+            gatt?.writeCharacteristic(characteristic)
+        }
+        alertDialog.setNegativeButton("Cancel") { alertDialog, _ -> alertDialog.cancel() }
+        alertDialog.create()
+        alertDialog.show()
+    }
+
+
 
 
 
@@ -319,6 +336,8 @@ class BLEServiceAdapter(
 
         return sb
     }
+
+
 
 
 
