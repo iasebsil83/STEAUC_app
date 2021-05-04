@@ -11,7 +11,7 @@
         android:id="@+id/ble_scan_head"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
-        android:background="#7D3B80"
+        android:background="@drawable/ble_scan_bg"
         app:layout_constraintBottom_toTopOf="@+id/ble_scan_rec_view"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -25,9 +25,8 @@
         android:layout_marginTop="45dp"
         android:layout_marginEnd="64dp"
         android:layout_marginBottom="45dp"
-        android:background="#8E8888"
-        android:gravity="center_horizontal"
-        android:text="@string/BLEScan_playTitle"
+        android:background="#3D7FC8"
+        android:text="@string/ble_scan_play_title"
         android:textAlignment="center"
         android:textColor="#FFFFFF"
         android:textSize="24sp"
@@ -35,25 +34,26 @@
         app:layout_constraintBottom_toTopOf="@+id/ble_scan_rec_view"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:gravity="center_horizontal" />
 
     <ImageButton
         android:id="@+id/ble_launch_scan"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="#00FFFFFF"
         app:layout_constraintBottom_toTopOf="@+id/ble_scan_rec_view"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/ble_scan_title"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_play_button"
-        tools:ignore="VectorDrawableCompat" />
+        app:srcCompat="@drawable/ic_play_button" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/ble_scan_rec_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="128dp"
-        android:background="#DEA9E1"
+        android:background="@drawable/ble_scan_bg2"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -66,15 +66,15 @@
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="0dp"
         android:layout_height="30dp"
-        android:layout_marginBottom="648dp"
         android:background="#00B41FEA"
         android:indeterminate="true"
+        android:indeterminateTint="#53C3DF"
         android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="@+id/ble_scan_rec_view"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/ble_scan_head"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.133" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

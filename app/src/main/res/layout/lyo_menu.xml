@@ -10,7 +10,7 @@
     <TextView
         android:id="@+id/menu_title"
         android:layout_width="181dp"
-        android:layout_height="56dp"
+        android:layout_height="60dp"
         android:background="@drawable/purple_border"
         android:fontFamily="serif-monospace"
         android:gravity="center_horizontal"

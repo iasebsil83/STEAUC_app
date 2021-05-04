@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/ble_device_info_global"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#95683F"
+    tools:context=".ble.BLEInteractActivity">
+
+    <View
+        android:id="@+id/ble_interact_bg"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="#E6AF57"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/ble_device_status"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <TextView
+        android:id="@+id/ble_device_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/no_device"
+        android:textAlignment="center"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/ble_device_status"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.148"
+        android:gravity="center_horizontal" />
+
+    <TextView
+        android:id="@+id/ble_device_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#8188BBF1"
+        android:paddingLeft="22dp"
+        android:paddingTop="5dp"
+        android:paddingRight="22dp"
+        android:paddingBottom="5dp"
+        android:text="@string/default_text"
+        android:textAlignment="center"
+        android:textColor="#FFFFFF"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.086"
+        android:gravity="center_horizontal" />
+
+    <View
+        android:id="@+id/ble_device_status_bg"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/ble_cell"
+        app:layout_constraintBottom_toBottomOf="@+id/ble_device_status"
+        app:layout_constraintEnd_toEndOf="@+id/ble_device_status"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="@+id/ble_device_status"
+        app:layout_constraintTop_toTopOf="@+id/ble_device_status"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/ble_services_rec_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="12dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/ble_device_status" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

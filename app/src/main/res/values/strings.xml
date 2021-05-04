@@ -1,11 +1,35 @@
 <resources>
+
+    <!-- utilities -->
+    <string name="default_text">Default Text</string>
+    <string name="popup_placeholder">Write something</string>
+    <string name="no_device">No device</string>
+
+    <!-- menus -->
     <string name="app_name">STEAUC</string>
     <string name="start">Start</string>
     <string name="menu_title">Menu</string>
     <string name="settings">Settings</string>
-    <string name="defaultText">Default Text</string>
-    <string name="BLEScan">BLE Scan</string>
-    <string name="BLEScan_pauseTitle">Scanning...</string>
-    <string name="BLEScan_playTitle">Launch scan</string>
-    <string name="scene_title">Scene</string>
+
+    <!-- BLE -->
+    <string name="ble_scan">BLE Scan</string>
+    <string name="ble_scan_pause_title">Scanning...</string>
+    <string name="ble_scan_play_title">Launch scan</string>
+    <string name="ble_connect">Connect</string>
+
+    <!-- BLE status -->
+    <string name="ble_device_status">Status : %1$s</string>
+    <string name="ble_device_status_connecting">Connecting...</string>
+    <string name="ble_device_status_connected">Connected</string>
+    <string name="ble_device_status_disconnected">Disconnected</string>
+    <string name="ble_device_status_disconnecting">Disconnecting...</string>
+
+    <!-- BLE services -->
+    <string name="ble_service_characteristic_title">Characteristic</string>
+    <string name="ble_service_properties_title">Properties</string>
+    <string name="ble_service_read_button_title">Read</string>
+    <string name="ble_service_write_button_title">Write</string>
+    <string name="ble_service_notify_button_title">Notify</string>
+    <string name="ble_interact_button_title">Interact</string>
+
 </resources>

@@ -2,20 +2,23 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/scene_global"
+    android:id="@+id/popup_global"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/space"
-    tools:context=".SceneActivity">
+    android:layout_height="match_parent">
 
-    <Button
-        android:id="@+id/scene_ble_interact_button"
+    <EditText
+        android:id="@+id/popup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/ble_interact_button_title"
+        android:background="#00FFFFFF"
+        android:backgroundTint="#00FFFFFF"
+        android:ems="10"
+        android:hint="@string/popup_placeholder"
+        android:inputType="textPersonName"
+        android:textColor="#000000"
+        android:textSize="24sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

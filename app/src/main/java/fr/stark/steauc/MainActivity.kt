@@ -36,7 +36,7 @@ class MainActivity : AppCompatActivity() {
 
 
 
-        // BUTTONS
+        //BUTTONS
 
         //bind menu button
         binding.mainStartButton.setOnClickListener{

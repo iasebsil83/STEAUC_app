@@ -1,7 +1,8 @@
 package fr.stark.steauc.log
 
 import android.annotation.SuppressLint
-import fr.stark.steauc.log.CodeInfo
+
+
 
 class Message(info: CodeInfo) : CodeInfo(
     info.getActorName(),

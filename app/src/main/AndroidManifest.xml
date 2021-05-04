@@ -15,10 +15,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.STEAUC">
-        <activity android:name=".SceneActivity"></activity>
-        <activity android:name=".ble.BLEScanActivity" />
-        <activity android:name=".SettingsActivity" />
-        <activity android:name=".MenuActivity" />
+
+        <!-- main -->
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -26,6 +24,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- menu -->
+        <activity android:name=".MenuActivity" />
+        <activity android:name=".SettingsActivity" />
+
+        <!-- BLE -->
+        <activity android:name=".ble.BLEScanActivity" />
+        <activity android:name=".ble.BLEInteractActivity" />
+
+        <!-- scene -->
+        <activity android:name=".SceneActivity"
+            android:theme="@style/Theme.STEAUC.NoActionBar" />
     </application>
 
 </manifest>

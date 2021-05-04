@@ -11,7 +11,7 @@ open class CodeInfo(
 ) {
 
     //function location
-    private lateinit var functionName: String
+    private var functionName: String = ""
 
     //log types
     val CODEINFO__MESSAGE       = 0
@@ -30,8 +30,8 @@ open class CodeInfo(
 
 
     //getters
-    fun getActorName() = actorName
-    fun getFileName() = fileName
+    fun getActorName()    = actorName
+    fun getFileName()     = fileName
     fun getFunctionName() = functionName
 
     //setters

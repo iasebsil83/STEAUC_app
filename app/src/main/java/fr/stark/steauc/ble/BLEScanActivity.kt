@@ -16,6 +16,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.LinearLayoutManager
+import fr.isen.sebastien_SILVANO.androiderestaurant.ble.BLEScanAdapter
 import fr.stark.steauc.R
 import fr.stark.steauc.SceneActivity
 import fr.stark.steauc.databinding.LyoBleScanBinding
@@ -51,15 +52,17 @@ class BLEScanActivity : AppCompatActivity() {
 
     //class info
     private val info : CodeInfo = CodeInfo("BLEScan", "ble/BLEScanActivity.kt")
+    private val msg  : Message  = Message(info)
+    private val err  : Error    = Error  (info)
 
     //BLE info
-    private var isScanning : Boolean = false
-    private var BLEavailable: Boolean = false
-    private lateinit var BLEManager: BluetoothManager
-    private var BLEAdapter: BluetoothAdapter? = null
-    private var BLEScanner: BluetoothLeScanner? = null
+    private var isScanning          : Boolean = false
+    private var BLEavailable        : Boolean = false
+    private lateinit var BLEManager : BluetoothManager
+    private var BLEAdapter          : BluetoothAdapter? = null
+    private var BLEScanner          : BluetoothLeScanner? = null
     private lateinit var BLEHandler : Handler
-    private var BLEScanList : MutableList<ScanResult> = mutableListOf()
+    private var BLEScanList         : MutableList<ScanResult> = mutableListOf()
 
 
 
@@ -108,7 +111,7 @@ class BLEScanActivity : AppCompatActivity() {
         //check BLE availability
         if(!BLEavailable){
             Toast.makeText(this, "BLE is not available for this device", Toast.LENGTH_SHORT).show()
-            Error(info).log(false, "BLE is not available for this device.")
+            err.log(false, "BLE is not available for this device.")
         }else{
             //debug
             Toast.makeText(this, "Ble is available.", Toast.LENGTH_SHORT).show()
@@ -121,11 +124,8 @@ class BLEScanActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.M)
     private fun setBLEVariables() {
         BLEManager = getSystemService(BluetoothManager::class.java)
-        BLEAdapter = BLEManager?.adapter
-        BLEavailable = (
-            packageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE) &&
-            BLEManager != null
-        )
+        BLEAdapter = BLEManager.adapter
+        BLEavailable = ( packageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE) )
         BLEScanner = BLEAdapter?.bluetoothLeScanner
         BLEHandler = Handler()
     }
@@ -162,30 +162,47 @@ class BLEScanActivity : AppCompatActivity() {
     // SCAN
 
     //callback
-    private val BLEScanCallback: ScanCallback = @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    object : ScanCallback() {
+    private val BLEScanCallback: ScanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             super.onScanResult(callbackType, result)
             info.setFunctionName("BLEScanCallBack")
 
-            //add the device
-            BLEScanList.add(result)
-            Message(info).log("Added BLE device [${BLEScanList.last().device.address}].")
+            //filter : do not get null-named devices
+            if( !result.scanRecord?.deviceName.isNullOrEmpty() ) {
 
-            BLEUpdateRecView()
+                //check if device already exists in mutable list
+                var deviceFound = false
+                BLEScanList.forEachIndexed { idx, sr ->
+
+                    //device already registered
+                    if (sr.device.address == result.device.address) {
+                        BLEScanList[idx] = result
+                        deviceFound = true
+                    }
+                }
+
+                //add device
+                if (!deviceFound) {
+                    BLEScanList.add(result)
+                }
+
+                //update display
+                BLEUpdateRecView()
+            }
         }
     }
 
 
 
     //start - stop
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun BLEStartScan() {
-
         //display
-        binding.bleScanTitle.text = getString(R.string.BLEScan_pauseTitle);
+        binding.bleScanTitle.text = getString(R.string.ble_scan_pause_title);
         binding.bleLaunchScan.setImageResource(R.drawable.ic_pause_button)
         binding.bleScanProgress.visibility = View.VISIBLE
+
+        //reset scan list
+        BLEScanList = mutableListOf()
 
         //launch scanner
         BLEScanner?.let { scanner ->
@@ -205,11 +222,9 @@ class BLEScanActivity : AppCompatActivity() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun BLEStopScan(){
-
         //display
-        binding.bleScanTitle.text = getString(R.string.BLEScan_playTitle);
+        binding.bleScanTitle.text = getString(R.string.ble_scan_play_title);
         binding.bleLaunchScan.setImageResource(R.drawable.ic_play_button)
         binding.bleScanProgress.visibility = View.INVISIBLE
 
@@ -233,10 +248,11 @@ class BLEScanActivity : AppCompatActivity() {
         //update recycler view
         binding.bleScanRecView.layoutManager = LinearLayoutManager(this)
         binding.bleScanRecView.adapter = BLEScanAdapter(
-            BLEScanList
+                BLEScanList
         ) { result ->
             val intent = Intent(this, SceneActivity::class.java)
-            intent.putExtra("Scene", result.toString())
+            intent.putExtra("BLEDevice", result.device)
+            intent.putExtra("BLEDeviceName", result.scanRecord?.deviceName)
             startActivity(intent)
         }
     }
