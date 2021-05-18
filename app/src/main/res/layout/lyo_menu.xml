@@ -2,9 +2,10 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/menu_global"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#8E8888"
+    android:background="@drawable/menu_bg"
     tools:context=".MenuActivity">
 
     <TextView
@@ -12,7 +13,7 @@
         android:layout_width="181dp"
         android:layout_height="60dp"
         android:background="@drawable/purple_border"
-        android:fontFamily="serif-monospace"
+        android:fontFamily="@font/archivo_black"
         android:gravity="center_horizontal"
         android:text="@string/menu_title"
         android:textAlignment="center"

@@ -2,15 +2,17 @@ package fr.stark.steauc
 
 import android.bluetooth.BluetoothDevice
 import android.content.Intent
+import android.opengl.GLSurfaceView
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.TextView
 import fr.stark.steauc.ble.BLEInteractActivity
 import fr.stark.steauc.ble.BLEScanActivity
 import fr.stark.steauc.databinding.LyoSceneBinding
+import fr.stark.steauc.gl.GLRenderer
 import fr.stark.steauc.log.CodeInfo
 import fr.stark.steauc.log.Error
 import fr.stark.steauc.log.Message
+
 
 
 class SceneActivity : AppCompatActivity() {
@@ -21,6 +23,10 @@ class SceneActivity : AppCompatActivity() {
     private val info : CodeInfo = CodeInfo("Scene", "SceneActivity.kt")
     private val msg  : Message  = Message(info)
     private val err  : Error    = Error  (info)
+
+    //openGL view
+    private lateinit var glView   : GLSurfaceView
+    private lateinit var renderer : GLRenderer
 
     //binding
     private lateinit var binding : LyoSceneBinding
@@ -52,6 +58,15 @@ class SceneActivity : AppCompatActivity() {
 
         //init binding instance
         binding = LyoSceneBinding.inflate(layoutInflater)
+
+
+
+        //3D SCENE
+
+        //init renderer
+        GLRenderer.bindRenderer(this, binding.openglScene)
+
+        //display
         setContentView(binding.root)
 
 

@@ -1,5 +1,6 @@
 package fr.stark.steauc.ble
 
+import android.Manifest
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
@@ -15,6 +16,7 @@ import android.os.Handler
 import android.view.View
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import fr.isen.sebastien_SILVANO.androiderestaurant.ble.BLEScanAdapter
 import fr.stark.steauc.R
@@ -31,6 +33,7 @@ import fr.stark.steauc.log.Message
 
 //request id
 const val BLE__REQUEST_ENABLE = 1
+const val BLE__REQUEST_NUMBER = 22
 
 //scan period (for timeout call)
 const val BLE__SCAN_PERIOD: Long = 10000
@@ -141,6 +144,13 @@ class BLEScanActivity : AppCompatActivity() {
             val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
             startActivityForResult(enableBtIntent, BLE__REQUEST_ENABLE)
         }
+
+        //permissions
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf( Manifest.permission.ACCESS_FINE_LOCATION ),
+            BLE__REQUEST_NUMBER
+        )
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

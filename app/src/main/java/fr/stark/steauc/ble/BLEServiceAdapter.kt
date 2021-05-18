@@ -30,13 +30,13 @@ import fr.stark.steauc.log.Error
 
 
 class BLEServiceAdapter(
-    private val gatt: BluetoothGatt?,
-    private val serviceList: MutableList<BLEService>,
-    private val context: Context
+    private val gatt        : BluetoothGatt?,
+    private val serviceList : MutableList<BLEService>,
+    private val context     : Context
 ) : ExpandableRecyclerViewAdapter<
         BLEServiceAdapter.ServiceViewHolder,
         BLEServiceAdapter.CharacteristicViewHolder
-        >(serviceList) {
+>(serviceList) {
 
 
 
@@ -244,6 +244,10 @@ class BLEServiceAdapter(
 
         //receive data
         this.readData(holder, characteristic)
+
+
+        //temporizing (for click event)
+        Thread.sleep(100)
     }
 
 
@@ -265,7 +269,6 @@ class BLEServiceAdapter(
 
         //display read info
         if (characteristic.value != null) {
-            msg.log("Received data : ${String(characteristic.value)}")
             holder.characteristicValue.text = "value : ${String(characteristic.value)}"
         }
     }
