@@ -8,9 +8,6 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import fr.stark.steauc.R
 import fr.stark.steauc.databinding.LyoBleRecViewCellBinding
-import fr.stark.steauc.log.CodeInfo
-import fr.stark.steauc.log.Message
-import fr.stark.steauc.log.Error
 
 
 
@@ -24,27 +21,16 @@ class BLEScanAdapter(
         private val onItemClickListener:(ScanResult) -> Unit
 ) : RecyclerView.Adapter<BLEScanAdapter.BLEScanViewHolder>() {
 
-    //info
-    private val info : CodeInfo = CodeInfo("BLEScanAdapter", "ble/BLEScanAdapter.kt")
-    private val msg  : Message  = Message(info)
-    private val err  : Error    = Error  (info)
 
 
     //init
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) : BLEScanAdapter.BLEScanViewHolder {
-
-        //debug
-        info.setFunctionName("onCreateViewHolder")
-        msg.log("Created RecyclerViewCell.")
-
-        return BLEScanViewHolder(
-            LyoBleRecViewCellBinding.inflate(
-                LayoutInflater.from(parent.context),
-                parent,
-                false
-            ).root
-        )
-    }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = BLEScanViewHolder(
+        LyoBleRecViewCellBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
+        ).root
+    )
 
 
 

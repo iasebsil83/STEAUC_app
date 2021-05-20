@@ -9,9 +9,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import fr.stark.steauc.R
 import fr.stark.steauc.SceneActivity
 import fr.stark.steauc.databinding.LyoBleInteractBinding
-import fr.stark.steauc.log.CodeInfo
-import fr.stark.steauc.log.Error
-import fr.stark.steauc.log.Message
 
 
 
@@ -24,11 +21,6 @@ class BLEInteractActivity : AppCompatActivity() {
 
 
 
-
-    //debug info
-    private val info : CodeInfo = CodeInfo("BLEInteract", "ble/BLEInteractActivity.kt")
-    private val msg  : Message = Message(info)
-    private val err  : Error   = Error  (info)
 
     //binding
     private lateinit var binding : LyoBleInteractBinding
@@ -45,7 +37,6 @@ class BLEInteractActivity : AppCompatActivity() {
     //init
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        info.setFunctionName("onCreate")
 
 
 
@@ -86,7 +77,6 @@ class BLEInteractActivity : AppCompatActivity() {
 
         //launch connection
         BLEGatt = device?.connectGatt(this, false, gattCallback)
-        //BLEGatt?.connect() //normally used only for reconnection
     }
 
 

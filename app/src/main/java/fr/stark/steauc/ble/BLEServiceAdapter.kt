@@ -18,9 +18,6 @@ import com.thoughtbot.expandablerecyclerview.models.ExpandableGroup
 import com.thoughtbot.expandablerecyclerview.viewholders.ChildViewHolder
 import com.thoughtbot.expandablerecyclerview.viewholders.GroupViewHolder
 import fr.stark.steauc.R
-import fr.stark.steauc.log.CodeInfo
-import fr.stark.steauc.log.Message
-import fr.stark.steauc.log.Error
 
 
 
@@ -44,11 +41,6 @@ class BLEServiceAdapter(
 
 
 
-
-    //debug info
-    private val info : CodeInfo = CodeInfo("BLEService", "BLEServiceAdapter.kt")
-    private val msg  : Message  = Message(info)
-    private val err  : Error    = Error  (info)
 
     //notification subscription
     private var enabled : Boolean = false
@@ -147,7 +139,6 @@ class BLEServiceAdapter(
         group: ExpandableGroup<*>,
         childIndex: Int
     ) {
-        info.setFunctionName("onBindChildViewHolder")
         val characteristic: BluetoothGattCharacteristic = (group as BLEService).items[childIndex]
 
 

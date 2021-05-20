@@ -5,7 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import fr.stark.steauc.ble.BLEScanActivity
 import fr.stark.steauc.databinding.LyoMenuBinding
-import fr.stark.steauc.log.CodeInfo
+
 
 
 class MenuActivity : AppCompatActivity() {
@@ -15,14 +15,10 @@ class MenuActivity : AppCompatActivity() {
     //binding
     private lateinit var binding : LyoMenuBinding
 
-    //debug info
-    private val info : CodeInfo = CodeInfo("Menu", "MenuActivity.kt")
-
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        info.setFunctionName("onCreate")
 
 
 

@@ -9,20 +9,12 @@ import fr.stark.steauc.ble.BLEInteractActivity
 import fr.stark.steauc.ble.BLEScanActivity
 import fr.stark.steauc.databinding.LyoSceneBinding
 import fr.stark.steauc.gl.GLRenderer
-import fr.stark.steauc.log.CodeInfo
-import fr.stark.steauc.log.Error
-import fr.stark.steauc.log.Message
 
 
 
 class SceneActivity : AppCompatActivity() {
 
 
-
-    //debug info
-    private val info : CodeInfo = CodeInfo("Scene", "SceneActivity.kt")
-    private val msg  : Message  = Message(info)
-    private val err  : Error    = Error  (info)
 
     //openGL view
     private lateinit var glView   : GLSurfaceView
@@ -36,7 +28,6 @@ class SceneActivity : AppCompatActivity() {
     //init
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        info.setFunctionName("onCreate")
 
 
 

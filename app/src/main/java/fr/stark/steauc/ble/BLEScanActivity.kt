@@ -22,9 +22,6 @@ import fr.isen.sebastien_SILVANO.androiderestaurant.ble.BLEScanAdapter
 import fr.stark.steauc.R
 import fr.stark.steauc.SceneActivity
 import fr.stark.steauc.databinding.LyoBleScanBinding
-import fr.stark.steauc.log.CodeInfo
-import fr.stark.steauc.log.Error
-import fr.stark.steauc.log.Message
 
 
 
@@ -53,11 +50,6 @@ class BLEScanActivity : AppCompatActivity() {
     //binding
     private lateinit var binding : LyoBleScanBinding
 
-    //class info
-    private val info : CodeInfo = CodeInfo("BLEScan", "ble/BLEScanActivity.kt")
-    private val msg  : Message  = Message(info)
-    private val err  : Error    = Error  (info)
-
     //BLE info
     private var isScanning          : Boolean = false
     private var BLEavailable        : Boolean = false
@@ -76,7 +68,6 @@ class BLEScanActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        info.setFunctionName("onCreate")
 
 
 
@@ -114,7 +105,6 @@ class BLEScanActivity : AppCompatActivity() {
         //check BLE availability
         if(!BLEavailable){
             Toast.makeText(this, "BLE is not available for this device", Toast.LENGTH_SHORT).show()
-            err.log(false, "BLE is not available for this device.")
         }else{
             //debug
             Toast.makeText(this, "Ble is available.", Toast.LENGTH_SHORT).show()
@@ -175,7 +165,6 @@ class BLEScanActivity : AppCompatActivity() {
     private val BLEScanCallback: ScanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             super.onScanResult(callbackType, result)
-            info.setFunctionName("BLEScanCallBack")
 
             //filter : do not get null-named devices
             if( !result.scanRecord?.deviceName.isNullOrEmpty() ) {
