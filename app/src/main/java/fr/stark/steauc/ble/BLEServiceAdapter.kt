@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothGattDescriptor
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.*
 import android.widget.Button
 import android.widget.EditText
@@ -18,21 +19,17 @@ import com.thoughtbot.expandablerecyclerview.models.ExpandableGroup
 import com.thoughtbot.expandablerecyclerview.viewholders.ChildViewHolder
 import com.thoughtbot.expandablerecyclerview.viewholders.GroupViewHolder
 import fr.stark.steauc.R
-
-
-
-
-
-
+import fr.stark.steauc.SceneActivity
+import fr.stark.steauc.gl.XYZ
 
 
 class BLEServiceAdapter(
-    private val gatt        : BluetoothGatt?,
-    private val serviceList : MutableList<BLEService>,
-    private val context     : Context
+    private val gatt         : BluetoothGatt?,
+    private val serviceList  : MutableList<BLEService>,
+    private val givenScene : SceneActivity
 ) : ExpandableRecyclerViewAdapter<
-        BLEServiceAdapter.ServiceViewHolder,
-        BLEServiceAdapter.CharacteristicViewHolder
+    BLEServiceAdapter.ServiceViewHolder,
+    BLEServiceAdapter.CharacteristicViewHolder
 >(serviceList) {
 
 
@@ -44,6 +41,7 @@ class BLEServiceAdapter(
 
     //notification subscription
     private var enabled : Boolean = false
+    private val scene : SceneActivity = givenScene
 
 
 
@@ -257,10 +255,95 @@ class BLEServiceAdapter(
     ){
         //get data
         gatt?.readCharacteristic(characteristic)
+        if(characteristic.value == null) {
+            return
+        }
+        var receivedData = String(characteristic.value)
 
         //display read info
-        if (characteristic.value != null) {
-            holder.characteristicValue.text = "value : ${String(characteristic.value)}"
+        if(characteristic.value != null){
+            holder.characteristicValue.text = "value : $receivedData"
+        }
+
+        //set received data
+        if(receivedData.length == 17) {
+
+            //error code
+            if(receivedData[2] == '2' && receivedData[3] == '3' && receivedData[4] == '2' && receivedData[5] == '8') {
+                return
+            }
+
+            //correct value
+            val lowestNegativeOn16b = 0x4000 //shall normally be 0x8000 (32768)
+            when(receivedData[0]){
+
+                //accelerometer
+                'A' -> {
+                    //Log.i("BLE >", "Received raw A : \"$receivedData\".")
+
+                    //check sign of the received value
+                    var uint16_value = fourHexToUInt16(receivedData[2], receivedData[3], receivedData[4], receivedData[5])
+                    if(uint16_value >= lowestNegativeOn16b){
+                        scene.receivedAccX += uint16ToInt16(uint16_value).toDouble()
+                    }else{
+                        scene.receivedAccX += uint16_value.toDouble()
+                    }
+
+                    //check sign of the received value
+                    uint16_value = fourHexToUInt16(receivedData[7], receivedData[8], receivedData[9], receivedData[10])
+                    if(uint16_value >= lowestNegativeOn16b){
+                        scene.receivedAccY += uint16ToInt16(uint16_value).toDouble()
+                    }else{
+                        scene.receivedAccY += uint16_value.toDouble()
+                    }
+
+                    //check sign of the received value
+                    uint16_value = fourHexToUInt16(receivedData[12], receivedData[13], receivedData[14], receivedData[15])
+                    if(uint16_value >= lowestNegativeOn16b){
+                        scene.receivedAccZ += uint16ToInt16(uint16_value).toDouble()
+                    }else{
+                        scene.receivedAccZ += uint16_value.toDouble()
+                    }
+                    //Log.i("BLE >", "Formatted A : (${scene.receivedAccX},${scene.receivedAccY},${scene.receivedAccZ}).")
+                }
+
+                //gyroscope
+                'G' -> {
+                    //Log.i("BLE >", "Received raw G : \"$receivedData\".")
+
+                    //check sign of the received value
+                    var uint16_value = fourHexToUInt16(receivedData[2], receivedData[3], receivedData[4], receivedData[5])
+                    if(uint16_value >= lowestNegativeOn16b){
+                        scene.receivedGyrX += uint16ToInt16(uint16_value).toDouble()
+                        val str = Integer.toBinaryString( uint16ToInt16(uint16_value) )
+                        Log.i("Int16", "Message \"$receivedData\" => -X : $str.")
+                    }else{
+                        scene.receivedGyrX += uint16_value.toDouble()
+                        Log.i("Int16", "Message \"$receivedData\" => +X : ${uint16_value}.")
+                    }
+
+                    //check sign of the received value
+                    uint16_value = fourHexToUInt16(receivedData[7], receivedData[8], receivedData[9], receivedData[10])
+                    if(uint16_value >= lowestNegativeOn16b){
+                        scene.receivedGyrY += uint16ToInt16(uint16_value).toDouble()
+                    }else{
+                        scene.receivedGyrY += uint16_value.toDouble()
+                    }
+
+                    //check sign of the received value
+                    uint16_value = fourHexToUInt16(receivedData[12], receivedData[13], receivedData[14], receivedData[15])
+                    if(uint16_value >= lowestNegativeOn16b){
+                        scene.receivedGyrZ += uint16ToInt16(uint16_value).toDouble()
+                    }else{
+                        scene.receivedGyrZ += uint16_value.toDouble()
+                    }
+
+                    //Log.i("BLE >", "Formatted G : (${scene.receivedGyrX},${scene.receivedGyrY},${scene.receivedGyrZ}).")
+                }
+
+                //incorrect value
+                else -> Log.i("BLE >", "Incorrect data received.")
+            }
         }
     }
 
@@ -272,8 +355,8 @@ class BLEServiceAdapter(
     ){
 
         //get layout elements
-        val alertDialog = AlertDialog.Builder(context)
-        val editView = View.inflate(context, R.layout.popup_write, null)
+        val alertDialog = AlertDialog.Builder(givenScene)
+        val editView = View.inflate(givenScene, R.layout.popup_write, null)
 
         //dialog popup settings
         alertDialog.setView(editView)
@@ -300,6 +383,36 @@ class BLEServiceAdapter(
     //UTILITIES
 
     //conversions
+    private fun hexToInt(c:Char) : Int {
+        when(c){
+            '1' -> return 1
+            '2' -> return 2
+            '3' -> return 3
+            '4' -> return 4
+            '5' -> return 5
+            '6' -> return 6
+            '7' -> return 7
+            '8' -> return 8
+            '9' -> return 9
+            'a' -> return 10
+            'b' -> return 11
+            'c' -> return 12
+            'd' -> return 13
+            'e' -> return 14
+            'f' -> return 15
+            else -> return 0
+        }
+    }
+
+    private fun fourHexToUInt16(hex1:Char, hex2:Char, hex3:Char, hex4:Char) : Int = (
+        4096 * hexToInt(hex1) +
+        256  * hexToInt(hex2) +
+        16   * hexToInt(hex3) +
+               hexToInt(hex4)
+    )
+
+    private fun uint16ToInt16(value:Int) : Int = -(value and 0x07ff)
+
     private fun byteArrayToHexString(array: ByteArray): String {
         val result = StringBuilder(array.size * 2)
 

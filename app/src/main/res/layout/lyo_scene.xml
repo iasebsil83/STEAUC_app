@@ -8,24 +8,13 @@
     android:background="@drawable/space"
     tools:context=".SceneActivity">
 
-    <Button
-        android:id="@+id/scene_ble_interact_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="672dp"
-        android:text="@string/ble_interact_button_title"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <TextView
-        android:id="@+id/menu_steauc_corner"
+        android:id="@+id/ble_device_status"
         android:layout_width="92dp"
         android:layout_height="29dp"
         android:fontFamily="sans-serif-condensed"
         android:gravity="center_horizontal"
-        android:text="@string/app_name"
+        android:text="@string/default_text"
         android:textAlignment="center"
         android:textColor="#FFFFFF"
         android:textSize="18sp"
@@ -37,11 +26,21 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.977" />
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/ble_services_rec_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="640dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <android.opengl.GLSurfaceView
         android:id="@+id/opengl_scene"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/scene_ble_interact_button"
+        app:layout_constraintBottom_toTopOf="@+id/ble_services_rec_view"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

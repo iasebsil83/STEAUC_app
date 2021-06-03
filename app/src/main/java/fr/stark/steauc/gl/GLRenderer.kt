@@ -1,9 +1,9 @@
 package fr.stark.steauc.gl
 
-import android.content.Context
 import android.opengl.GLES20
 import android.opengl.GLSurfaceView
 import android.util.Log
+import fr.stark.steauc.SceneActivity
 import java.util.*
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
@@ -22,7 +22,7 @@ const val UPDATE_SCENE_DELAY : Long = 40
 
 
 
-class GLRenderer(givenContext : Context) : GLSurfaceView.Renderer {
+class GLRenderer(givenScene:SceneActivity) : GLSurfaceView.Renderer {
 
 
 
@@ -30,10 +30,10 @@ class GLRenderer(givenContext : Context) : GLSurfaceView.Renderer {
 
 
     //context (for app files access)
-    private val context : Context = givenContext
+    private val scene : SceneActivity = givenScene
 
     //3D objects
-    private lateinit var hand     : PlakObject
+    private lateinit var hand : PlakObject
 
 
 
@@ -48,12 +48,10 @@ class GLRenderer(givenContext : Context) : GLSurfaceView.Renderer {
 
         //set 3D objects
         hand = PlakObject(
-            context,
+            scene,
             "scene_hand.stl",
             Color(255,0,0,255)
         )
-        hand.translate(0f, 0f, -0.09f)
-        hand.rotate(0.0, 90.0, 0.0)
         hand.scale(10f, 10f, 10f)
 
         //launch timed updates
@@ -92,10 +90,17 @@ class GLRenderer(givenContext : Context) : GLSurfaceView.Renderer {
     private fun updateScene(){
 
         //rotation
-        hand.rotate(0.0, -PI/128, 0.0)
+        hand.resetPlakList()
+        //hand.rotate(0.0, PI, 0.0)
+        hand.rotate(
+            scene.receivedGyrX * PI/65536, // = PI/65536
+            scene.receivedGyrY * PI/65536, //From [int16] to [-PI,PI]
+            scene.receivedGyrZ * PI/65536
+        )
+        //hand.translate(0f, 0f, -0.09f)
 
         //debug
-        Log.i("GLRenderer >","Update !")
+        //Log.i("GLRenderer >","Update !")
     }
 
 
@@ -106,13 +111,13 @@ class GLRenderer(givenContext : Context) : GLSurfaceView.Renderer {
     //layout binding
     companion object {
 
-        fun bindRenderer(context : Context, view: GLSurfaceView) {
+        fun bindRenderer(scene : SceneActivity, view: GLSurfaceView) {
 
             //create OpenGL ES 2.0 context
             view.setEGLContextClientVersion(2)
 
             //create renderer
-            view.setRenderer( GLRenderer(context) )
+            view.setRenderer( GLRenderer(scene) )
 
             //some settings
             //view.renderMode = GLSurfaceView.RENDERMODE_WHEN_DIRTY

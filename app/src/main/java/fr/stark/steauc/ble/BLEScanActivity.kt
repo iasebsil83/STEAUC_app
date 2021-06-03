@@ -251,7 +251,6 @@ class BLEScanActivity : AppCompatActivity() {
         ) { result ->
             val intent = Intent(this, SceneActivity::class.java)
             intent.putExtra("BLEDevice", result.device)
-            intent.putExtra("BLEDeviceName", result.scanRecord?.deviceName)
             startActivity(intent)
         }
     }

@@ -52,9 +52,15 @@ class PlakObject {
     private val program   : Int
 
     //coordinates
-    private var plakList  : MutableList<Plak>
-    private var xyzBuffer : FloatBuffer
-    private val xyzCount  : Int
+    private var plakList        : MutableList<Plak>
+    private var defaultPlakList : MutableList<Plak>
+    private var xyzBuffer       : FloatBuffer
+    private val xyzCount        : Int
+
+    //rotation
+    private var prevRotX  : Double = 0.0
+    private var prevRotY  : Double = 0.0
+    private var prevRotZ  : Double = 0.0
 
     //color
     private val color     : FloatArray
@@ -110,6 +116,21 @@ class PlakObject {
             }
         }
 
+        //save default values
+        defaultPlakList = mutableListOf()
+        for(pl in plakList){
+            val p1 = pl.getP1()
+            val p2 = pl.getP2()
+            val p3 = pl.getP3()
+            defaultPlakList.add(
+                Plak(
+                    XYZ( p1.getX(), p1.getY(), p1.getZ() ),
+                    XYZ( p2.getX(), p2.getY(), p2.getZ() ),
+                    XYZ( p3.getX(), p3.getY(), p3.getZ() )
+                )
+            )
+        }
+
         //set coordinates
         xyzCount = plakList.size * 3
         xyzBuffer = newXYZBuffer(plakList)
@@ -128,6 +149,21 @@ class PlakObject {
 
     constructor(plaks : MutableList<Plak>, givenColor : Color){
         plakList = plaks
+
+        //save default values
+        defaultPlakList = mutableListOf()
+        for(pl in plakList){
+            val p1 = pl.getP1()
+            val p2 = pl.getP2()
+            val p3 = pl.getP3()
+            defaultPlakList.add(
+                Plak(
+                    XYZ( p1.getX(), p1.getY(), p1.getZ() ),
+                    XYZ( p2.getX(), p2.getY(), p2.getZ() ),
+                    XYZ( p3.getX(), p3.getY(), p3.getZ() )
+                )
+            )
+        }
 
         //set coordinates
         xyzCount = plaks.size * 3
@@ -239,7 +275,27 @@ class PlakObject {
 
 
     //rotation
+    fun resetPlakList(){
+
+        //reset plakList from defaultPlakList
+        for(p in 0 until defaultPlakList.size){
+            val p1 = defaultPlakList[p].getP1()
+            val p2 = defaultPlakList[p].getP2()
+            val p3 = defaultPlakList[p].getP3()
+            plakList[p] = Plak(
+                XYZ( p1.getX(), p1.getY(), p1.getZ() ),
+                XYZ( p2.getX(), p2.getY(), p2.getZ() ),
+                XYZ( p3.getX(), p3.getY(), p3.getZ() )
+            )
+        }
+    }
+
     fun rotate(angleX:Double, angleY:Double, angleZ:Double){
+
+        //set prev angles
+        prevRotX = angleX
+        prevRotX = angleY
+        prevRotX = angleZ
 
         //calculations
         var cosX = cos(angleX)
@@ -297,7 +353,8 @@ class PlakObject {
             p3.scale(scaleX, scaleY, scaleZ)
 
             //update plak
-            plakList[p] = Plak(p1, p2, p3)
+            plakList       [p] = Plak(p1, p2, p3)
+            defaultPlakList[p] = Plak(p1, p2, p3)
         }
 
         //update buffer
@@ -332,7 +389,7 @@ class PlakObject {
         GLES20.glUniform4fv(fragment_color, 1, color, 0)
 
         //draw
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, xyzCount)
+        GLES20.glDrawArrays(GLES20.GL_LINE_LOOP, 0, xyzCount)
         GLES20.glDisableVertexAttribArray(gl_position)
     }
 }
