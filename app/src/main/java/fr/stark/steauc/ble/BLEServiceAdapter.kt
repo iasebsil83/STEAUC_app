@@ -23,6 +23,7 @@ import fr.stark.steauc.SceneActivity
 import fr.stark.steauc.gl.XYZ
 
 
+
 class BLEServiceAdapter(
     private val gatt         : BluetoothGatt?,
     private val serviceList  : MutableList<BLEService>,
@@ -32,20 +33,9 @@ class BLEServiceAdapter(
     BLEServiceAdapter.CharacteristicViewHolder
 >(serviceList) {
 
-
-
-
-
-
-
-
     //notification subscription
     private var enabled : Boolean = false
     private val scene : SceneActivity = givenScene
-
-
-
-
 
 
 
@@ -57,8 +47,6 @@ class BLEServiceAdapter(
         val serviceName: TextView = itemView.findViewById(R.id.ble_service_name)
         val serviceUUID: TextView = itemView.findViewById(R.id.ble_service_uuid)
     }
-
-
 
     //child
     class CharacteristicViewHolder(itemView: View) : ChildViewHolder(itemView) {
@@ -76,10 +64,6 @@ class BLEServiceAdapter(
 
 
 
-
-
-
-
     //VIEW HOLDERS
 
     //parent
@@ -91,8 +75,6 @@ class BLEServiceAdapter(
                 false
             )
         )
-
-
 
     //child
     override fun onCreateChildViewHolder(
@@ -110,10 +92,6 @@ class BLEServiceAdapter(
 
 
 
-
-
-
-
     //BIND
 
     //parent
@@ -127,8 +105,6 @@ class BLEServiceAdapter(
         holder.serviceUUID.text = group.title
     }
 
-
-
     //child
     @SuppressLint("SetTextI18n")
     override fun onBindChildViewHolder(
@@ -138,7 +114,6 @@ class BLEServiceAdapter(
         childIndex: Int
     ) {
         val characteristic: BluetoothGattCharacteristic = (group as BLEService).items[childIndex]
-
 
 
         //LAYOUT
@@ -168,7 +143,6 @@ class BLEServiceAdapter(
 
         //properties
         holder.characteristicProperties.text = "Properties : ${prop}"
-
 
 
         //ACTION BUTTONS
@@ -228,20 +202,14 @@ class BLEServiceAdapter(
         }
 
 
-
         //DATA TRANSFERS
 
         //receive data
         this.readData(holder, characteristic)
 
-
         //temporizing (for click event)
         Thread.sleep(100)
     }
-
-
-
-
 
 
 
@@ -376,10 +344,6 @@ class BLEServiceAdapter(
 
 
 
-
-
-
-
     //UTILITIES
 
     //conversions
@@ -447,10 +411,6 @@ class BLEServiceAdapter(
 
 
 
-
-
-
-
     //CONSTANTS
 
     //UUID attributes
@@ -458,7 +418,7 @@ class BLEServiceAdapter(
         ACCES_GENERIQUE   ("00001800-0000-1000-8000-00805f9b34fb", "Accès générique"),
         ATTRIBUT_GENERIQUE("00001801-0000-1000-8000-00805f9b34fb", "Attribut générique"),
         SERVICE_SPECIFIQUE("466c1234-f593-11e8-8eb2-f2801f1b9fd1", "Service Spécifique "),
-        SERVICE_SPE2      ("466c9abc-f593-11e8-8eb2-f2801f1b9fd1", "Service Spécifique "),
+        SERVICE_SPE2      ("466c9abc-f593-11e8-8eb2-f2801f1b9fd1", "Service Spécifique2 "),
         UNKNOW_SERVICE    ("",                                     "Unknown");
 
         companion object {

@@ -1,9 +1,6 @@
 package fr.stark.steauc.gl
 
 import android.content.Context
-import android.opengl.GLES20
-import android.opengl.GLES20.GL_FRAGMENT_SHADER
-import android.opengl.GLES20.GL_VERTEX_SHADER
 import java.lang.NumberFormatException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -13,64 +10,28 @@ import kotlin.math.sin
 
 
 
+open class PlakObject {
 
+    //plaks
+    protected var plakList        : MutableList<Plak>
+    protected var defaultPlakList : MutableList<Plak>
 
-
-//shaders
-const val vertexShaderCode =
-    "attribute vec4 vPosition;"  +
-    "void main() {"              +
-    "  gl_Position = vPosition;" +
-    "}"
-const val fragmentShaderCode =
-    "precision mediump float;" +
-    "uniform vec4 vColor;"     +
-    "void main() {"            +
-    "  gl_FragColor = vColor;" +
-    "}"
-
-
-
-//memory allocation
-const val FloatStride : Int = 4 //4 bytes
-const val XYZStride   : Int = 3 * FloatStride
-const val PlakStride  : Int = 3 * XYZStride
-
-
-
-
-
-
-class PlakObject {
-
-
-
-
-
-
-    //GLSL program
-    private val program   : Int
-
-    //coordinates
-    private var plakList        : MutableList<Plak>
-    private var defaultPlakList : MutableList<Plak>
-    private var xyzBuffer       : FloatBuffer
-    private val xyzCount        : Int
-
-    //rotation
-    private var prevRotX  : Double = 0.0
-    private var prevRotY  : Double = 0.0
-    private var prevRotZ  : Double = 0.0
+    //coordinates buffer
+    private var xyzBuffer : FloatBuffer
+    private val xyzCount  : Int
 
     //color
-    private val color     : FloatArray
+    private val color : FloatArray
+
+    //GLSL program
+    private val program : Int = GLRenderer.initProgram()
 
 
 
 
+    // INITIALIZATION
 
-
-    //init
+    //init using STL file
     constructor(givenContext : Context, path : String, givenColor: Color){
 
         //read file by blocks of 3 lines
@@ -108,10 +69,10 @@ class PlakObject {
                                 XYZ( sl3[1].toFloat(), sl3[2].toFloat(), sl3[3].toFloat() )
                             )
                         )
-                    }catch(e : NumberFormatException){}
+                    }catch(e : NumberFormatException){
+                    }
 
                     lineParity = 1
-
                 }
             }
         }
@@ -119,20 +80,17 @@ class PlakObject {
         //save default values
         defaultPlakList = mutableListOf()
         for(pl in plakList){
-            val p1 = pl.getP1()
-            val p2 = pl.getP2()
-            val p3 = pl.getP3()
             defaultPlakList.add(
                 Plak(
-                    XYZ( p1.getX(), p1.getY(), p1.getZ() ),
-                    XYZ( p2.getX(), p2.getY(), p2.getZ() ),
-                    XYZ( p3.getX(), p3.getY(), p3.getZ() )
+                    XYZ( pl.p1.getX(), pl.p1.getY(), pl.p1.getZ() ),
+                    XYZ( pl.p2.getX(), pl.p2.getY(), pl.p2.getZ() ),
+                    XYZ( pl.p3.getX(), pl.p3.getY(), pl.p3.getZ() )
                 )
             )
         }
 
         //set coordinates
-        xyzCount = plakList.size * 3
+        xyzCount  = plakList.size * 3
         xyzBuffer = newXYZBuffer(plakList)
 
         //set color
@@ -142,25 +100,20 @@ class PlakObject {
             givenColor.getBlue(),
             givenColor.getAlpha()
         )
-
-        //set GLSL program
-        program = initProgram()
     }
 
+    //init using plakList
     constructor(plaks : MutableList<Plak>, givenColor : Color){
         plakList = plaks
 
         //save default values
         defaultPlakList = mutableListOf()
         for(pl in plakList){
-            val p1 = pl.getP1()
-            val p2 = pl.getP2()
-            val p3 = pl.getP3()
             defaultPlakList.add(
                 Plak(
-                    XYZ( p1.getX(), p1.getY(), p1.getZ() ),
-                    XYZ( p2.getX(), p2.getY(), p2.getZ() ),
-                    XYZ( p3.getX(), p3.getY(), p3.getZ() )
+                    XYZ( pl.p1.getX(), pl.p1.getY(), pl.p1.getZ() ),
+                    XYZ( pl.p2.getX(), pl.p2.getY(), pl.p2.getZ() ),
+                    XYZ( pl.p3.getX(), pl.p3.getY(), pl.p3.getZ() )
                 )
             )
         }
@@ -176,21 +129,18 @@ class PlakObject {
             givenColor.getBlue(),
             givenColor.getAlpha()
         )
-
-        //set GLSL program
-        program = initProgram()
     }
 
 
 
 
+    // BUFFERS
 
-
-    //init : Float buffer & GLSL program
-    private fun newXYZBuffer(plaks : MutableList<Plak>) : FloatBuffer {
+    //XYZBuffer
+    private fun newXYZBuffer(plaks:MutableList<Plak>) : FloatBuffer {
 
         //allocate vertex buffer
-        val byteBuf = ByteBuffer.allocateDirect(plaks.size * PlakStride)
+        val byteBuf = ByteBuffer.allocateDirect(plaks.size * PLAK_STRIDE)
         byteBuf.order(ByteOrder.nativeOrder())
 
         //set xyzCount et xyzBuffer
@@ -198,17 +148,17 @@ class PlakObject {
 
         //fill vertexBuffer
         for(p in plaks){
-            p.getP1().also{ point ->
+            p.p1.also{ point ->
                 floatBuf.put( point.getX() )
                 floatBuf.put( point.getY() )
                 floatBuf.put( point.getZ() )
             }
-            p.getP2().also{ point ->
+            p.p2.also{ point ->
                 floatBuf.put( point.getX() )
                 floatBuf.put( point.getY() )
                 floatBuf.put( point.getZ() )
             }
-            p.getP3().also{ point ->
+            p.p3.also{ point ->
                 floatBuf.put( point.getX() )
                 floatBuf.put( point.getY() )
                 floatBuf.put( point.getZ() )
@@ -219,143 +169,113 @@ class PlakObject {
         return floatBuf
     }
 
-    private fun initProgram() : Int {
-
-        //vertex shader
-        val vertexShader = GLES20.glCreateShader(GL_VERTEX_SHADER)
-        GLES20.glShaderSource(vertexShader, vertexShaderCode)
-        GLES20.glCompileShader(vertexShader)
-
-        //fragment shader
-        val fragmentShader = GLES20.glCreateShader(GL_FRAGMENT_SHADER)
-        GLES20.glShaderSource(fragmentShader, fragmentShaderCode)
-        GLES20.glCompileShader(fragmentShader)
-
-        //program
-        val prog = GLES20.glCreateProgram()
-        GLES20.glAttachShader(prog, vertexShader)
-        GLES20.glAttachShader(prog, fragmentShader)
-        GLES20.glLinkProgram(prog)
-
-        return prog
-    }
-
-
-
-
-
-
-    //position
-    fun translate(dx:Float, dy:Float, dz:Float){
-
-        //for each plak
-        for(p in 0 until plakList.size){
-
-            //get points
-            val p1 = plakList[p].getP1()
-            val p2 = plakList[p].getP2()
-            val p3 = plakList[p].getP3()
-
-            //apply translations
-            p1.translate(dx, dy, dz)
-            p2.translate(dx, dy, dz)
-            p3.translate(dx, dy, dz)
-
-            //update plak
-            plakList[p] = Plak(p1, p2, p3)
-        }
-
-        //update buffer
+    private fun resetXYZBuffer() {
+        resetPosition()
         xyzBuffer = newXYZBuffer(plakList)
     }
 
 
 
 
+    //GENERAL MOVEMENTS
 
-
-    //rotation
-    fun resetPlakList(){
+    //position
+    fun resetPosition(){
 
         //reset plakList from defaultPlakList
         for(p in 0 until defaultPlakList.size){
-            val p1 = defaultPlakList[p].getP1()
-            val p2 = defaultPlakList[p].getP2()
-            val p3 = defaultPlakList[p].getP3()
             plakList[p] = Plak(
-                XYZ( p1.getX(), p1.getY(), p1.getZ() ),
-                XYZ( p2.getX(), p2.getY(), p2.getZ() ),
-                XYZ( p3.getX(), p3.getY(), p3.getZ() )
+                XYZ( defaultPlakList[p].p1.getX(), defaultPlakList[p].p1.getY(), defaultPlakList[p].p1.getZ() ),
+                XYZ( defaultPlakList[p].p2.getX(), defaultPlakList[p].p2.getY(), defaultPlakList[p].p2.getZ() ),
+                XYZ( defaultPlakList[p].p3.getX(), defaultPlakList[p].p3.getY(), defaultPlakList[p].p3.getZ() )
             )
         }
     }
 
-    fun rotate(angleX:Double, angleY:Double, angleZ:Double){
-
-        //set prev angles
-        prevRotX = angleX
-        prevRotX = angleY
-        prevRotX = angleZ
-
-        //calculations
-        var cosX = cos(angleX)
-        var sinX = sin(angleX)
-        var cosY = cos(angleY)
-        var sinY = sin(angleY)
-        var cosZ = cos(angleZ)
-        var sinZ = sin(angleZ)
-
-        //for each plak
-        for(p in 0 until plakList.size){
-
-            //apply X rotation
-            var newP1 = plakList[p].getP1().rotateX(cosX, sinX)
-            var newP2 = plakList[p].getP2().rotateX(cosX, sinX)
-            var newP3 = plakList[p].getP3().rotateX(cosX, sinX)
-            plakList[p] = Plak(newP1, newP2, newP3)
-
-            //apply Y rotation
-            newP1 = plakList[p].getP1().rotateY(cosY, sinY)
-            newP2 = plakList[p].getP2().rotateY(cosY, sinY)
-            newP3 = plakList[p].getP3().rotateY(cosY, sinY)
-            plakList[p] = Plak(newP1, newP2, newP3)
-
-            //apply Z rotation
-            newP1 = plakList[p].getP1().rotateZ(cosZ, sinZ)
-            newP2 = plakList[p].getP2().rotateZ(cosZ, sinZ)
-            newP3 = plakList[p].getP3().rotateZ(cosZ, sinZ)
-            plakList[p] = Plak(newP1, newP2, newP3)
+    fun translate(dx:Float, dy:Float, dz:Float, definitive:Boolean = false){
+        if(definitive) {
+            PL_translate(defaultPlakList, dx, dy, dz)
         }
+        PL_translate(plakList, dx, dy, dz)
 
         //update buffer
         xyzBuffer = newXYZBuffer(plakList)
     }
 
+    //rotations
+    fun rotate(angleX:Double, angleY:Double, angleZ:Double, definitive:Boolean = false) = rotate(
+        XYZ(), angleX, angleY, angleZ,
+        definitive=definitive
+    )
 
+    fun rotate(center:XYZ, angleX:Double, angleY:Double, angleZ:Double, definitive:Boolean = false){
+        rotateX(center, angleX, definitive=definitive)
+        rotateY(center, angleY, definitive=definitive)
+        rotateZ(center, angleZ, definitive=definitive)
+    }
 
+    fun rotateX(angleX:Double, definitive:Boolean = false) = rotateX(
+        XYZ(), angleX,
+        definitive=definitive
+    )
+    fun rotateX(center:XYZ, angleX:Double, definitive:Boolean = false){
+        val cosX = cos(angleX)
+        val sinX = sin(angleX)
 
+        //apply rotation X
+        if(definitive) {
+            PL_rotateX(defaultPlakList, center, cosX, sinX)
+        }
+        PL_rotateX(plakList, center, cosX, sinX)
 
+        //update buffer
+        xyzBuffer = newXYZBuffer(plakList)
+    }
+
+    fun rotateY(angleY:Double, definitive:Boolean = false) = rotateY(
+        XYZ(), angleY,
+        definitive=definitive
+    )
+    fun rotateY(center:XYZ, angleY:Double, definitive: Boolean = false){
+        val cosY = cos(angleY)
+        val sinY = sin(angleY)
+
+        //apply rotation Y
+        if(definitive) {
+            PL_rotateY(defaultPlakList, center, cosY, sinY)
+        }
+        PL_rotateY(plakList, center, cosY, sinY)
+
+        //update buffer
+        xyzBuffer = newXYZBuffer(plakList)
+    }
+
+    fun rotateZ(angleZ:Double, definitive:Boolean = false) = rotateZ(
+        XYZ(), angleZ,
+        definitive=definitive
+    )
+    fun rotateZ(center:XYZ, angleZ:Double, definitive: Boolean = false){
+        val cosZ = cos(angleZ)
+        val sinZ = sin(angleZ)
+
+        //apply rotation Z
+        if(definitive) {
+            PL_rotateZ(defaultPlakList, center, cosZ, sinZ)
+        }
+        PL_rotateZ(plakList, center, cosZ, sinZ)
+
+        //update buffer
+        xyzBuffer = newXYZBuffer(plakList)
+    }
 
     //scale
-    fun scale(scaleX:Float, scaleY:Float, scaleZ:Float){
+    fun scale(sx:Float, sy:Float, sz:Float, definitive:Boolean = false){
 
-        //for each plak
-        for(p in 0 until plakList.size){
-
-            //get points
-            val p1 = plakList[p].getP1()
-            val p2 = plakList[p].getP2()
-            val p3 = plakList[p].getP3()
-
-            //apply scale
-            p1.scale(scaleX, scaleY, scaleZ)
-            p2.scale(scaleX, scaleY, scaleZ)
-            p3.scale(scaleX, scaleY, scaleZ)
-
-            //update plak
-            plakList       [p] = Plak(p1, p2, p3)
-            defaultPlakList[p] = Plak(p1, p2, p3)
+        //apply scale
+        if(definitive) {
+            PL_scale(defaultPlakList, sx, sy, sz)
         }
+        PL_scale(plakList, sx, sy, sz)
 
         //update buffer
         xyzBuffer = newXYZBuffer(plakList)
@@ -364,32 +284,53 @@ class PlakObject {
 
 
 
-
-
-    //display
-    fun draw() {
-        GLES20.glUseProgram(program)
-
-        //get handle to vertex shader's vPosition member
-        val gl_position = GLES20.glGetAttribLocation(program, "vPosition")
-        GLES20.glEnableVertexAttribArray(gl_position)
-
-        //prepare plak coordinates
-        GLES20.glVertexAttribPointer(
-            gl_position,
-            3,
-            GLES20.GL_FLOAT,
-            false,
-            XYZStride,
-            xyzBuffer
-        )
-
-        //set fragment color
-        val fragment_color = GLES20.glGetUniformLocation(program, "vColor")
-        GLES20.glUniform4fv(fragment_color, 1, color, 0)
-
-        //draw
-        GLES20.glDrawArrays(GLES20.GL_LINE_LOOP, 0, xyzCount)
-        GLES20.glDisableVertexAttribArray(gl_position)
+    //PlakList movements
+    private fun PL_translate(pl:MutableList<Plak>, dx:Float, dy:Float, dz:Float){
+        for(p in 0 until pl.size){
+            pl[p].p1.translate(dx, dy, dz)
+            pl[p].p2.translate(dx, dy, dz)
+            pl[p].p3.translate(dx, dy, dz)
+        }
     }
+
+    private fun PL_rotateX(pl:MutableList<Plak>, center:XYZ, cosX:Double, sinX:Double){
+        for(p in 0 until pl.size){
+            pl[p].p1.rotateX(center, cosX, sinX)
+            pl[p].p2.rotateX(center, cosX, sinX)
+            pl[p].p3.rotateX(center, cosX, sinX)
+        }
+    }
+
+    private fun PL_rotateY(pl:MutableList<Plak>, center:XYZ, cosY:Double, sinY:Double){
+        for(p in 0 until pl.size){
+            pl[p].p1.rotateY(center, cosY, sinY)
+            pl[p].p2.rotateY(center, cosY, sinY)
+            pl[p].p3.rotateY(center, cosY, sinY)
+        }
+    }
+
+    private fun PL_rotateZ(pl:MutableList<Plak>, center:XYZ, cosZ:Double, sinZ:Double){
+        for(p in 0 until pl.size){
+            pl[p].p1.rotateZ(center, cosZ, sinZ)
+            pl[p].p2.rotateZ(center, cosZ, sinZ)
+            pl[p].p3.rotateZ(center, cosZ, sinZ)
+        }
+    }
+
+    private fun PL_scale(pl:MutableList<Plak>, scaleX:Float, scaleY:Float, scaleZ:Float){
+        for(p in 0 until pl.size){
+            pl[p].p1.scale(scaleX, scaleY, scaleZ)
+            pl[p].p2.scale(scaleX, scaleY, scaleZ)
+            pl[p].p3.scale(scaleX, scaleY, scaleZ)
+        }
+    }
+
+
+
+
+    //getters
+    fun getColor()     = color
+    fun getXYZBuffer() = xyzBuffer
+    fun getXYZCount()  = xyzCount
+    fun getProgram()   = program
 }

@@ -8,8 +8,6 @@ import fr.stark.steauc.databinding.LyoSettingsBinding
 
 class SettingsActivity : AppCompatActivity() {
 
-
-
     //binding
     private lateinit var binding : LyoSettingsBinding
 
@@ -18,8 +16,6 @@ class SettingsActivity : AppCompatActivity() {
     //init
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-
 
         // LAYOUT
 

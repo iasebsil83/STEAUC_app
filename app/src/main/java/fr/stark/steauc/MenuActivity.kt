@@ -10,8 +10,6 @@ import fr.stark.steauc.databinding.LyoMenuBinding
 
 class MenuActivity : AppCompatActivity() {
 
-
-
     //binding
     private lateinit var binding : LyoMenuBinding
 
@@ -21,7 +19,6 @@ class MenuActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
 
-
         // LAYOUT
 
         //init binding instance
@@ -29,12 +26,16 @@ class MenuActivity : AppCompatActivity() {
         setContentView(binding.root)
 
 
-
         // BUTTONS
 
         //bind menu start
+        /* TEMPORARILY DISABLED FOR 3D TESTING
         binding.menuStartButton.setOnClickListener{
             val intent = Intent(this, BLEScanActivity::class.java)
+            startActivity(intent)
+        }*/
+        binding.menuStartButton.setOnClickListener{
+            val intent = Intent(this, SceneActivity::class.java)
             startActivity(intent)
         }
 

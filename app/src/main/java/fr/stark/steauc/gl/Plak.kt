@@ -2,14 +2,17 @@ package fr.stark.steauc.gl
 
 
 
+//memory allocation
+const val PLAK_STRIDE : Int = 3 * XYZ_STRIDE
+
+
+
 class Plak{
 
-
-
     //points
-    private val p1 : XYZ
-    private val p2 : XYZ
-    private val p3 : XYZ
+    val p1 : XYZ
+    val p2 : XYZ
+    val p3 : XYZ
 
 
 
@@ -25,11 +28,4 @@ class Plak{
         p2 = givenP2
         p3 = givenP3
     }
-
-
-
-    //getters
-    fun getP1() = p1
-    fun getP2() = p2
-    fun getP3() = p3
 }

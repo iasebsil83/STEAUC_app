@@ -9,8 +9,6 @@ import fr.stark.steauc.databinding.LyoMainBinding
 
 class MainActivity : AppCompatActivity() {
 
-
-
     //binding
     private lateinit var binding : LyoMainBinding
 
@@ -21,13 +19,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
 
-
         // LAYOUT
 
         //init binding instance
         binding = LyoMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
 
 
         //BUTTONS

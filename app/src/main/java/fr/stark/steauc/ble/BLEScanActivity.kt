@@ -25,9 +25,6 @@ import fr.stark.steauc.databinding.LyoBleScanBinding
 
 
 
-
-
-
 //request id
 const val BLE__REQUEST_ENABLE = 1
 const val BLE__REQUEST_NUMBER = 22
@@ -38,14 +35,7 @@ const val BLE__SCAN_PERIOD: Long = 10000
 
 
 
-
-
 class BLEScanActivity : AppCompatActivity() {
-
-
-
-
-
 
     //binding
     private lateinit var binding : LyoBleScanBinding
@@ -62,13 +52,10 @@ class BLEScanActivity : AppCompatActivity() {
 
 
 
-
-
     // INITIALIZATION
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
 
 
         // LAYOUT
@@ -94,7 +81,6 @@ class BLEScanActivity : AppCompatActivity() {
                 BLEStartScan()
             }
         }
-
 
 
         //BLE
@@ -126,8 +112,6 @@ class BLEScanActivity : AppCompatActivity() {
 
 
 
-
-
     // PERMISSIONS
     private fun promptEnableBluetooth() {
         if(! (BLEAdapter!!.isEnabled) ){
@@ -153,8 +137,6 @@ class BLEScanActivity : AppCompatActivity() {
             }
         }
     }
-
-
 
 
 
@@ -235,8 +217,6 @@ class BLEScanActivity : AppCompatActivity() {
             scanner.stopScan(BLEScanCallback)
         }
     }
-
-
 
 
 

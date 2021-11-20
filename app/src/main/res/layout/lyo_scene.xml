@@ -45,4 +45,76 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <Button
+        android:id="@+id/scene_forward"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/scene_button_forward"
+        app:backgroundTint="#7D3B80"
+        app:layout_constraintBottom_toTopOf="@+id/ble_services_rec_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.052"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.027" />
+
+    <Button
+        android:id="@+id/scene_backward"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/scene_button_backward"
+        app:backgroundTint="#7D3B80"
+        app:layout_constraintBottom_toTopOf="@+id/ble_services_rec_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.944"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.027" />
+
+    <Button
+        android:id="@+id/scene_down"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/scene_button_down"
+        app:backgroundTint="#7D3B80"
+        app:layout_constraintBottom_toTopOf="@+id/ble_services_rec_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/scene_up" />
+
+    <Button
+        android:id="@+id/scene_left"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/scene_button_left"
+        app:backgroundTint="#7D3B80"
+        app:layout_constraintBottom_toTopOf="@+id/ble_services_rec_view"
+        app:layout_constraintEnd_toStartOf="@+id/scene_down"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/scene_up" />
+
+    <Button
+        android:id="@+id/scene_right"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/scene_button_right"
+        app:backgroundTint="#7D3B80"
+        app:layout_constraintBottom_toTopOf="@+id/ble_services_rec_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/scene_down"
+        app:layout_constraintTop_toBottomOf="@+id/scene_up" />
+
+    <Button
+        android:id="@+id/scene_up"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/scene_button_up"
+        app:backgroundTint="#7D3B80"
+        app:layout_constraintBottom_toTopOf="@+id/ble_services_rec_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.871" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

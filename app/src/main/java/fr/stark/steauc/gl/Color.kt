@@ -1,28 +1,25 @@
 package fr.stark.steauc.gl
 
 
+//standard colors
+val RED     = Color(255,  0,  0, 255)
+val GREEN   = Color(  0,255,  0, 255)
+val BLUE    = Color(  0,  0,255, 255)
+val CYAN    = Color(  0,255,255, 255)
+val YELLOW  = Color(255,255,  0, 255)
+val MAGENTA = Color(255,  0,255, 255)
+val WHITE   = Color(255,255,255, 255)
+val BLACK   = Color(  0,  0,  0, 255)
 
-class Color {
 
 
+class Color(givenRed:Int, givenGreen:Int, givenBlue:Int, givenAlpha:Int){
 
     //coordinates
-    private var red   = 0f
-    private var green = 0f
-    private var blue  = 0f
-    private var alpha = 1f
-
-
-
-    //init
-    constructor()
-
-    constructor(givenRed:Int, givenGreen:Int, givenBlue:Int, givenAlpha:Int){
-        red   = givenRed  /255f
-        green = givenGreen/255f
-        blue  = givenBlue /255f
-        alpha = givenAlpha/255f
-    }
+    private val red   : Float = givenRed.toFloat()   / 255f
+    private val green : Float = givenGreen.toFloat() / 255f
+    private val blue  : Float = givenBlue.toFloat()  / 255f
+    private val alpha : Float = givenAlpha.toFloat() / 255f
 
 
 

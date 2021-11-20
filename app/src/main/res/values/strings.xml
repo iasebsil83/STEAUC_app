@@ -32,4 +32,12 @@
     <string name="ble_service_notify_button_title">Notify</string>
     <string name="ble_interact_button_title">Interact</string>
 
+    <!-- Scene buttons -->
+    <string name="scene_button_forward">Forward</string>
+    <string name="scene_button_backward">Backward</string>
+    <string name="scene_button_left">Left</string>
+    <string name="scene_button_right">Right</string>
+    <string name="scene_button_up">Up</string>
+    <string name="scene_button_down">Down</string>
+
 </resources>
