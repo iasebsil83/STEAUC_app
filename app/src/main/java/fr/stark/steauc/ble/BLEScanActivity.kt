@@ -21,6 +21,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import fr.isen.sebastien_SILVANO.androiderestaurant.ble.BLEScanAdapter
 import fr.stark.steauc.R
 import fr.stark.steauc.SceneActivity
+import fr.stark.steauc.log.CodeInfo
+import fr.stark.steauc.log.Error
+import fr.stark.steauc.log.Message
 import fr.stark.steauc.databinding.LyoBleScanBinding
 
 
@@ -36,6 +39,11 @@ const val BLE__SCAN_PERIOD: Long = 10000
 
 
 class BLEScanActivity : AppCompatActivity() {
+
+    //debug info
+    private val info : CodeInfo = CodeInfo("BLE", "ble/BLEScanActivity.kt")
+    private val msg  : Message  = Message(info)
+    private val err  : Error    = Error  (info)
 
     //binding
     private lateinit var binding : LyoBleScanBinding
@@ -56,6 +64,7 @@ class BLEScanActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        info.setFunctionName("onCreate")
 
 
         // LAYOUT
@@ -102,6 +111,8 @@ class BLEScanActivity : AppCompatActivity() {
 
     @RequiresApi(Build.VERSION_CODES.M)
     private fun setBLEVariables() {
+        info.setFunctionName("setBLEVariables")
+
         BLEManager = getSystemService(BluetoothManager::class.java)
         BLEAdapter = BLEManager.adapter
         BLEavailable = ( packageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE) )
@@ -114,6 +125,9 @@ class BLEScanActivity : AppCompatActivity() {
 
     // PERMISSIONS
     private fun promptEnableBluetooth() {
+        info.setFunctionName("promptEnableBluetooth")
+
+        //send request
         if(! (BLEAdapter!!.isEnabled) ){
             val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
             startActivityForResult(enableBtIntent, BLE__REQUEST_ENABLE)
@@ -129,6 +143,8 @@ class BLEScanActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+        info.setFunctionName("onActivityResult")
+
         when (requestCode) {
             BLE__REQUEST_ENABLE -> {
                 if (resultCode != Activity.RESULT_OK) {
@@ -147,6 +163,7 @@ class BLEScanActivity : AppCompatActivity() {
     private val BLEScanCallback: ScanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             super.onScanResult(callbackType, result)
+            info.setFunctionName("onScanResult")
 
             //filter : do not get null-named devices
             if( !result.scanRecord?.deviceName.isNullOrEmpty() ) {
@@ -177,6 +194,8 @@ class BLEScanActivity : AppCompatActivity() {
 
     //start - stop
     private fun BLEStartScan() {
+        info.setFunctionName("BLEStartScan")
+
         //display
         binding.bleScanTitle.text = getString(R.string.ble_scan_pause_title);
         binding.bleLaunchScan.setImageResource(R.drawable.ic_pause_button)
@@ -204,6 +223,8 @@ class BLEScanActivity : AppCompatActivity() {
     }
 
     private fun BLEStopScan(){
+        info.setFunctionName("BLEStopScan")
+
         //display
         binding.bleScanTitle.text = getString(R.string.ble_scan_play_title);
         binding.bleLaunchScan.setImageResource(R.drawable.ic_play_button)
@@ -223,6 +244,7 @@ class BLEScanActivity : AppCompatActivity() {
 
     // DISPLAY
     private fun BLEUpdateRecView(){
+        info.setFunctionName("BLEUpdateRecView")
 
         //update recycler view
         binding.bleScanRecView.layoutManager = LinearLayoutManager(this)

@@ -7,18 +7,19 @@ import android.bluetooth.BluetoothGattDescriptor
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.*
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import com.thoughtbot.expandablerecyclerview.ExpandableRecyclerViewAdapter
 import com.thoughtbot.expandablerecyclerview.models.ExpandableGroup
 import com.thoughtbot.expandablerecyclerview.viewholders.ChildViewHolder
 import com.thoughtbot.expandablerecyclerview.viewholders.GroupViewHolder
 import fr.stark.steauc.R
+import fr.stark.steauc.log.CodeInfo
+import fr.stark.steauc.log.Error
+import fr.stark.steauc.log.Message
 import fr.stark.steauc.SceneActivity
 import fr.stark.steauc.gl.XYZ
 
@@ -32,6 +33,11 @@ class BLEServiceAdapter(
     BLEServiceAdapter.ServiceViewHolder,
     BLEServiceAdapter.CharacteristicViewHolder
 >(serviceList) {
+
+    //debug info
+    private val info : CodeInfo = CodeInfo("BLE", "ble/BLEServiceAdapter.kt")
+    private val msg  : Message  = Message(info)
+    private val err  : Error    = Error  (info)
 
     //notification subscription
     private var enabled : Boolean = false
@@ -100,6 +106,8 @@ class BLEServiceAdapter(
         flatPosition: Int,
         group: ExpandableGroup<*>
     ) {
+        info.setFunctionName("onBindGroupViewHolder")
+
         val title = BLEUUIDAttribute.getBLEAttributeFromUUID(group.title).title
         holder.serviceName.text = title
         holder.serviceUUID.text = group.title
@@ -113,6 +121,7 @@ class BLEServiceAdapter(
         group: ExpandableGroup<*>,
         childIndex: Int
     ) {
+        info.setFunctionName("onBindChildViewHolder")
         val characteristic: BluetoothGattCharacteristic = (group as BLEService).items[childIndex]
 
 
@@ -221,6 +230,8 @@ class BLEServiceAdapter(
         holder         : BLEServiceAdapter.CharacteristicViewHolder,
         characteristic : BluetoothGattCharacteristic
     ){
+        info.setFunctionName("readData")
+
         //get data
         gatt?.readCharacteristic(characteristic)
         if(characteristic.value == null) {
@@ -247,7 +258,7 @@ class BLEServiceAdapter(
 
                 //accelerometer
                 'A' -> {
-                    //Log.i("BLE >", "Received raw A : \"$receivedData\".")
+                    //msg.log("Received raw A : \"$receivedData\".")
 
                     //check sign of the received value
                     var uint16_value = fourHexToUInt16(receivedData[2], receivedData[3], receivedData[4], receivedData[5])
@@ -272,22 +283,22 @@ class BLEServiceAdapter(
                     }else{
                         scene.receivedAccZ += uint16_value.toDouble()
                     }
-                    //Log.i("BLE >", "Formatted A : (${scene.receivedAccX},${scene.receivedAccY},${scene.receivedAccZ}).")
+                    //msg.log("Formatted A : (${scene.receivedAccX},${scene.receivedAccY},${scene.receivedAccZ}).")
                 }
 
                 //gyroscope
                 'G' -> {
-                    //Log.i("BLE >", "Received raw G : \"$receivedData\".")
+                    //msg.log("Received raw G : \"$receivedData\".")
 
                     //check sign of the received value
                     var uint16_value = fourHexToUInt16(receivedData[2], receivedData[3], receivedData[4], receivedData[5])
                     if(uint16_value >= lowestNegativeOn16b){
                         scene.receivedGyrX += uint16ToInt16(uint16_value).toDouble()
                         val str = Integer.toBinaryString( uint16ToInt16(uint16_value) )
-                        Log.i("Int16", "Message \"$receivedData\" => -X : $str.")
+                        msg.log("Int16 Message \"$receivedData\" => -X : $str.")
                     }else{
                         scene.receivedGyrX += uint16_value.toDouble()
-                        Log.i("Int16", "Message \"$receivedData\" => +X : ${uint16_value}.")
+                        msg.log("Int16 Message \"$receivedData\" => +X : ${uint16_value}.")
                     }
 
                     //check sign of the received value
@@ -306,11 +317,11 @@ class BLEServiceAdapter(
                         scene.receivedGyrZ += uint16_value.toDouble()
                     }
 
-                    //Log.i("BLE >", "Formatted G : (${scene.receivedGyrX},${scene.receivedGyrY},${scene.receivedGyrZ}).")
+                    //msg.log("Formatted G : (${scene.receivedGyrX},${scene.receivedGyrY},${scene.receivedGyrZ}).")
                 }
 
                 //incorrect value
-                else -> Log.i("BLE >", "Incorrect data received.")
+                else -> msg.log("Incorrect data received.")
             }
         }
     }
@@ -318,9 +329,8 @@ class BLEServiceAdapter(
 
 
     //write
-    private fun writeData(
-        characteristic : BluetoothGattCharacteristic
-    ){
+    private fun writeData(characteristic:BluetoothGattCharacteristic){
+        info.setFunctionName("writeData")
 
         //get layout elements
         val alertDialog = AlertDialog.Builder(givenScene)
@@ -378,6 +388,7 @@ class BLEServiceAdapter(
     private fun uint16ToInt16(value:Int) : Int = -(value and 0x07ff)
 
     private fun byteArrayToHexString(array: ByteArray): String {
+        info.setFunctionName("byteArrayToHexString")
         val result = StringBuilder(array.size * 2)
 
         //append character per character
@@ -391,7 +402,9 @@ class BLEServiceAdapter(
     }
 
     //availability details on screen
-    private fun setPropertiesString(property: Int): StringBuilder {
+    private fun setPropertiesString(property:Int) : StringBuilder {
+        info.setFunctionName("setPropertiesString")
+
         val sb = StringBuilder()
         if( (property and BluetoothGattCharacteristic.PROPERTY_WRITE) != 0) {
             sb.append("Write")
@@ -414,7 +427,7 @@ class BLEServiceAdapter(
     //CONSTANTS
 
     //UUID attributes
-    enum class BLEUUIDAttribute(val uuid: String, val title: String) {
+    enum class BLEUUIDAttribute(val uuid:String, val title:String) {
         ACCES_GENERIQUE   ("00001800-0000-1000-8000-00805f9b34fb", "Accès générique"),
         ATTRIBUT_GENERIQUE("00001801-0000-1000-8000-00805f9b34fb", "Attribut générique"),
         SERVICE_SPECIFIQUE("466c1234-f593-11e8-8eb2-f2801f1b9fd1", "Service Spécifique "),
@@ -422,7 +435,7 @@ class BLEServiceAdapter(
         UNKNOW_SERVICE    ("",                                     "Unknown");
 
         companion object {
-            fun getBLEAttributeFromUUID(uuid: String) = values().firstOrNull { it.uuid == uuid } ?: UNKNOW_SERVICE
+            fun getBLEAttributeFromUUID(uuid:String) = values().firstOrNull { it.uuid == uuid } ?: UNKNOW_SERVICE
         }
     }
 }

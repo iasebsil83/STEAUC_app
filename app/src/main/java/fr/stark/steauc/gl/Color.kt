@@ -1,6 +1,10 @@
 package fr.stark.steauc.gl
 
 
+//strides
+const val RGB_STRIDE  = 3 * FLOAT_STRIDE
+const val RGBA_STRIDE = 4 * FLOAT_STRIDE
+
 //standard colors
 val RED     = Color(255,  0,  0, 255)
 val GREEN   = Color(  0,255,  0, 255)

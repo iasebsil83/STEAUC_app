@@ -1,39 +1,48 @@
 package fr.stark.steauc.gl
 
-import android.opengl.GLES20
+import android.opengl.GLES10
+import android.opengl.GLES30
 import android.opengl.GLSurfaceView
 import android.util.Log
+import fr.stark.steauc.log.CodeInfo
+import fr.stark.steauc.log.Error
+import fr.stark.steauc.log.Message
 import fr.stark.steauc.SceneActivity
-//import fr.stark.steauc.gl.forms.Cuboid
-//import fr.stark.steauc.gl.forms.Plane
 import java.util.*
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
-import kotlin.math.PI
-
-
 
 
 //scene refresh
 const val UPDATE_SCENE_DELAY : Long = 40 //in ms
 
+//buffers
+const val NULL_INDEX          = 0
+const val VERTEX_BUFFER_INDEX = 1
+const val INDICE_BUFFER_INDEX = 2
+
 //shaders
 const val vertexShaderCode =
     "attribute vec4 vPosition;"  +
-            "void main() {"              +
-            "  gl_Position = vPosition;" +
-            "}"
+    "void main() {"              +
+    "  gl_Position = vPosition;" +
+    "}"
 const val fragmentShaderCode =
     "precision mediump float;" +
-            "uniform vec4 vColor;"     +
-            "void main() {"            +
-            "  gl_FragColor = vColor;" +
-            "}"
+    "uniform vec4 vColor;"     +
+    "void main() {"            +
+    "  gl_FragColor = vColor;" +
+    "}"
 
 
 
 
 class GLRenderer(givenScene:SceneActivity) : GLSurfaceView.Renderer {
+
+    //debug info
+    private val info : CodeInfo = CodeInfo("GL", "gl/GLRenderer.kt")
+    private val msg  : Message  = Message(info)
+    private val err  : Error    = Error  (info)
 
     //context (for app files access)
     private val scene : SceneActivity = givenScene
@@ -44,9 +53,10 @@ class GLRenderer(givenScene:SceneActivity) : GLSurfaceView.Renderer {
 
     //init
     override fun onSurfaceCreated(unused: GL10, config: EGLConfig) {
+        info.setFunctionName("onSurfaceCreated")
 
         //Set the background frame color
-        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f)
+        GLES30.glClearColor(0.0f, 0.0f, 0.0f, 1.0f)
 
         //load 3D objects
         scene.initScene()
@@ -64,48 +74,52 @@ class GLRenderer(givenScene:SceneActivity) : GLSurfaceView.Renderer {
 
     //graphic updates
     override fun onDrawFrame(unused: GL10) {
+        info.setFunctionName("onDrawFrame")
 
         //background color
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
+        GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT)
+        GLES30.glClearDepthf(0.1f)
 
-        //get elements from scene
-        val elements = scene.getSceneElements()
+        val pos = scene.getPosition()
+        GLES10.glTranslatef(pos.x, pos.y, pos.z)
 
-        //for each element
-        for(e in 0 until elements.size) {
+        //for each element in the scene
+        for(e in scene.getSceneElements()) {
 
             //GLSL PROGRAM
 
             //use program
-            val prog = elements[e].getProgram()
-            GLES20.glUseProgram(prog)
+            val prog = e.getProgram()
+            GLES30.glUseProgram(prog)
 
             //get handle to vertex shader's vPosition member
-            val glPosition = GLES20.glGetAttribLocation(prog, "vPosition")
-            GLES20.glEnableVertexAttribArray(glPosition)
+            val glPosition = GLES30.glGetAttribLocation(prog, "vPosition")
+            GLES30.glEnableVertexAttribArray(glPosition)
 
             //prepare plak coordinates
-            GLES20.glVertexAttribPointer(
-                glPosition,
+            GLES30.glVertexAttribPointer(
+                0,
                 3,
-                GLES20.GL_FLOAT,
+                GLES30.GL_FLOAT,
                 false,
-                XYZ_STRIDE,
-                elements[e].getXYZBuffer() //elements[e].getXYZBuffer()
+                0,
+                e.getVertexBuffer()
             )
 
             //set fragment color
-            val fragmentColor = GLES20.glGetUniformLocation(prog, "vColor")
-            GLES20.glUniform4fv(fragmentColor, 1, elements[e].getColor(), 0)
+            val fragmentColor = GLES30.glGetUniformLocation(prog, "vColor")
+            GLES30.glUniform4fv(fragmentColor, 1, e.getColor(), 0)
 
             //draw
-            GLES20.glDrawArrays(GLES20.GL_LINE_LOOP, 0, elements[e].getXYZCount())
-            GLES20.glDisableVertexAttribArray(glPosition)
-            }
+            GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0, e.getCooNbr())
+            GLES30.glDisableVertexAttribArray(glPosition)
+        }
     }
 
     override fun onSurfaceChanged(unused: GL10, width: Int, height: Int) {
-        GLES20.glViewport(0, 0, width, height)
+        info.setFunctionName("onSurfaceChanged")
+
+        GLES30.glViewport(0, 0, width, height)
     }
 
 
@@ -131,20 +145,20 @@ class GLRenderer(givenScene:SceneActivity) : GLSurfaceView.Renderer {
         fun initProgram() : Int {
 
             //vertex shader
-            val vertexShader = GLES20.glCreateShader(GLES20.GL_VERTEX_SHADER)
-            GLES20.glShaderSource(vertexShader, vertexShaderCode)
-            GLES20.glCompileShader(vertexShader)
+            val vertexShader = GLES30.glCreateShader(GLES30.GL_VERTEX_SHADER)
+            GLES30.glShaderSource(vertexShader, vertexShaderCode)
+            GLES30.glCompileShader(vertexShader)
 
             //fragment shader
-            val fragmentShader = GLES20.glCreateShader(GLES20.GL_FRAGMENT_SHADER)
-            GLES20.glShaderSource(fragmentShader, fragmentShaderCode)
-            GLES20.glCompileShader(fragmentShader)
+            val fragmentShader = GLES30.glCreateShader(GLES30.GL_FRAGMENT_SHADER)
+            GLES30.glShaderSource(fragmentShader, fragmentShaderCode)
+            GLES30.glCompileShader(fragmentShader)
 
             //program
-            val prog = GLES20.glCreateProgram()
-            GLES20.glAttachShader(prog, vertexShader)
-            GLES20.glAttachShader(prog, fragmentShader)
-            GLES20.glLinkProgram(prog)
+            val prog = GLES30.glCreateProgram()
+            GLES30.glAttachShader(prog, vertexShader)
+            GLES30.glAttachShader(prog, fragmentShader)
+            GLES30.glLinkProgram(prog)
 
             return prog
         }

@@ -4,6 +4,9 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import fr.stark.steauc.ble.BLEScanActivity
+import fr.stark.steauc.log.CodeInfo
+import fr.stark.steauc.log.Error
+import fr.stark.steauc.log.Message
 import fr.stark.steauc.databinding.LyoMenuBinding
 
 

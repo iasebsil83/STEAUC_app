@@ -7,6 +7,9 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import fr.stark.steauc.R
+import fr.stark.steauc.log.CodeInfo
+import fr.stark.steauc.log.Error
+import fr.stark.steauc.log.Message
 import fr.stark.steauc.databinding.LyoBleRecViewCellBinding
 
 
@@ -21,6 +24,10 @@ class BLEScanAdapter(
         private val onItemClickListener:(ScanResult) -> Unit
 ) : RecyclerView.Adapter<BLEScanAdapter.BLEScanViewHolder>() {
 
+    //debug info
+    private val info : CodeInfo = CodeInfo("BLE", "ble/BLEScanAdapter.kt")
+    private val msg  : Message  = Message(info)
+    private val err  : Error    = Error  (info)
 
 
     //init
@@ -49,6 +56,8 @@ class BLEScanAdapter(
 
     //events
     override fun onBindViewHolder(holder: BLEScanViewHolder, position: Int) {
+        info.setFunctionName("onBindViewHolder")
+
         holder.cellTitle.text   = scanList[position].scanRecord?.deviceName
         holder.cellContent.text = scanList[position].device.address
         holder.cellCase.setOnClickListener(){
