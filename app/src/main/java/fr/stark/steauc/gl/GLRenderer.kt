@@ -1,5 +1,6 @@
 package fr.stark.steauc.gl
 
+import android.opengl.EGL14
 import android.opengl.GLES10
 import android.opengl.GLES30
 import android.opengl.GLSurfaceView
@@ -13,8 +14,9 @@ import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
 
-//scene refresh
-const val UPDATE_SCENE_DELAY : Long = 40 //in ms
+
+//version
+const val EGL_VERSION : Int = 3
 
 //buffers
 const val NULL_INDEX          = 0
@@ -58,15 +60,12 @@ class GLRenderer(givenScene:SceneActivity) : GLSurfaceView.Renderer {
         //Set the background frame color
         GLES30.glClearColor(0.0f, 0.0f, 0.0f, 1.0f)
 
-        //load 3D objects
-        scene.initScene()
-
-        //launch timed updates
+        //launch timed updates (delay is returned from the initScene() call)
         Timer().scheduleAtFixedRate(object : TimerTask() {
             override fun run() {
                 scene.updateScene()
             }
-        }, 0, UPDATE_SCENE_DELAY)
+        }, 0, scene.initScene())
     }
 
 
@@ -77,11 +76,7 @@ class GLRenderer(givenScene:SceneActivity) : GLSurfaceView.Renderer {
         info.setFunctionName("onDrawFrame")
 
         //background color
-        GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT)
-        GLES30.glClearDepthf(0.1f)
-
-        val pos = scene.getPosition()
-        GLES10.glTranslatef(pos.x, pos.y, pos.z)
+        GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT or GLES30.GL_DEPTH_BUFFER_BIT)
 
         //for each element in the scene
         for(e in scene.getSceneElements()) {
@@ -92,9 +87,6 @@ class GLRenderer(givenScene:SceneActivity) : GLSurfaceView.Renderer {
             val prog = e.getProgram()
             GLES30.glUseProgram(prog)
 
-            //get handle to vertex shader's vPosition member
-            val glPosition = GLES30.glGetAttribLocation(prog, "vPosition")
-            GLES30.glEnableVertexAttribArray(glPosition)
 
             //prepare plak coordinates
             GLES30.glVertexAttribPointer(
@@ -106,13 +98,16 @@ class GLRenderer(givenScene:SceneActivity) : GLSurfaceView.Renderer {
                 e.getVertexBuffer()
             )
 
+            //enable
+            GLES30.glEnableVertexAttribArray(0)
+
             //set fragment color
             val fragmentColor = GLES30.glGetUniformLocation(prog, "vColor")
             GLES30.glUniform4fv(fragmentColor, 1, e.getColor(), 0)
 
             //draw
             GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0, e.getCooNbr())
-            GLES30.glDisableVertexAttribArray(glPosition)
+            GLES30.glDisableVertexAttribArray(0)
         }
     }
 
@@ -131,8 +126,8 @@ class GLRenderer(givenScene:SceneActivity) : GLSurfaceView.Renderer {
        //layout binding
         fun bindRenderer(scene : SceneActivity, view: GLSurfaceView) {
 
-            //create OpenGL ES 2.0 context
-            view.setEGLContextClientVersion(2)
+            //create OpenGL ES context
+            view.setEGLContextClientVersion(EGL_VERSION)
 
             //create renderer
             view.setRenderer( GLRenderer(scene) )
@@ -158,6 +153,9 @@ class GLRenderer(givenScene:SceneActivity) : GLSurfaceView.Renderer {
             val prog = GLES30.glCreateProgram()
             GLES30.glAttachShader(prog, vertexShader)
             GLES30.glAttachShader(prog, fragmentShader)
+
+            //get handle to vertex shader's vPosition member
+            GLES30.glBindAttribLocation(prog, 0, "vPosition")
             GLES30.glLinkProgram(prog)
 
             return prog

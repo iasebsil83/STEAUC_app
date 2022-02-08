@@ -46,10 +46,10 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/scene_forward"
+        android:id="@+id/scene_select"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/scene_button_forward"
+        android:text="@string/default_text"
         app:backgroundTint="#7D3B80"
         app:layout_constraintBottom_toTopOf="@+id/ble_services_rec_view"
         app:layout_constraintEnd_toEndOf="parent"
@@ -59,10 +59,10 @@
         app:layout_constraintVertical_bias="0.027" />
 
     <Button
-        android:id="@+id/scene_backward"
+        android:id="@+id/scene_action"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/scene_button_backward"
+        android:text="@string/default_text"
         app:backgroundTint="#7D3B80"
         app:layout_constraintBottom_toTopOf="@+id/ble_services_rec_view"
         app:layout_constraintEnd_toEndOf="parent"

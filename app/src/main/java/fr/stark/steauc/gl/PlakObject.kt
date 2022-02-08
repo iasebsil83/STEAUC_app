@@ -18,6 +18,9 @@ open class PlakObject(plaks:MutableList<Plak>, givenColor:Color) {
     private val msg  : Message  = Message(info)
     private val err  : Error    = Error  (info)
 
+    //position trace
+    private var position = XYZ()
+
     //plaks
     protected var plakList        : MutableList<Plak> = plaks
     protected var defaultPlakList : MutableList<Plak> = MutableList(plakList.size) { i ->
@@ -49,7 +52,10 @@ open class PlakObject(plaks:MutableList<Plak>, givenColor:Color) {
 
     //init
     init {
-        updateBuffers() //fill buffers
+
+        //init buffers
+        initColorsBuffer()
+        updateBuffers()
     }
 
 
@@ -81,7 +87,7 @@ open class PlakObject(plaks:MutableList<Plak>, givenColor:Color) {
         }
     }
 
-    //translation
+    //translations
     fun translate(dx:Float, dy:Float, dz:Float, definitive:Boolean=false) {
         if(definitive) {
             for(p in 0 until defaultPlakList.size){
@@ -96,14 +102,31 @@ open class PlakObject(plaks:MutableList<Plak>, givenColor:Color) {
             plakList[p].p3.translate(dx, dy, dz)
         }
         updateBuffers()
+
+        //update position trace as well
+        position.x += dx
+        position.y += dy
+        position.z += dz
     }
+
+    fun translateX(dx:Float, definitive:Boolean=false) = translate(
+        dx, 0f, 0f,
+        definitive=definitive
+    )
+    fun translateY(dy:Float, definitive:Boolean=false) = translate(
+        0f, dy, 0f,
+        definitive=definitive
+    )
+    fun translateZ(dz:Float, definitive:Boolean=false) = translate(
+        0f, 0f, dz,
+        definitive=definitive
+    )
 
     //rotations
     fun rotate(angleX:Float, angleY:Float, angleZ:Float, definitive:Boolean=false) = rotate(
         XYZ(), angleX, angleY, angleZ,
         definitive=definitive
     )
-
     fun rotate(center:XYZ, angleX:Float, angleY:Float, angleZ:Float, definitive:Boolean=false) {
         rotateX(center, angleX, definitive=definitive)
         rotateY(center, angleY, definitive=definitive)
@@ -168,13 +191,13 @@ open class PlakObject(plaks:MutableList<Plak>, givenColor:Color) {
 
         //apply rotation Z
         if(definitive) {
-            for(p in 0 until defaultPlakList.size){
+            for(p in 0 until defaultPlakList.size) {
                 defaultPlakList[p].p1.rotateZ(center, cosZ, sinZ)
                 defaultPlakList[p].p2.rotateZ(center, cosZ, sinZ)
                 defaultPlakList[p].p3.rotateZ(center, cosZ, sinZ)
             }
         }
-        for(p in 0 until plakList.size){
+        for(p in 0 until plakList.size) {
             plakList[p].p1.rotateZ(center, cosZ, sinZ)
             plakList[p].p2.rotateZ(center, cosZ, sinZ)
             plakList[p].p3.rotateZ(center, cosZ, sinZ)
@@ -201,10 +224,36 @@ open class PlakObject(plaks:MutableList<Plak>, givenColor:Color) {
         updateBuffers()
     }
 
+    fun scaleX(scaleX:Float, definitive:Boolean=false) = scale(
+        scaleX, 1f, 1f,
+        definitive=definitive
+    )
+    fun scaleY(scaleY:Float, definitive:Boolean=false) = scale(
+        1f, scaleY, 1f,
+        definitive=definitive
+    )
+    fun scaleZ(scaleZ:Float, definitive:Boolean=false) = scale(
+        1f, 1f, scaleZ,
+        definitive=definitive
+    )
+
 
 
 
     //BUFFERS
+
+    //colorsBuffer
+    private fun initColorsBuffer() {
+        colorsBuffer.position(0)
+
+        //fill buffers
+        for(p in plakList){
+            colorsBuffer.put( color[0] ); colorsBuffer.put( color[1] ); colorsBuffer.put( color[2] )
+            colorsBuffer.put( color[0] ); colorsBuffer.put( color[1] ); colorsBuffer.put( color[2] )
+            colorsBuffer.put( color[0] ); colorsBuffer.put( color[1] ); colorsBuffer.put( color[2] )
+        }
+        colorsBuffer.position(0)
+    }
 
     //update buffers that depends on plakList (required at each plakList modification)
     private fun updateBuffers() {
@@ -240,24 +289,11 @@ open class PlakObject(plaks:MutableList<Plak>, givenColor:Color) {
         normalBuffer.position(0)
     }
 
-    fun initColorBuffer() {
-        colorsBuffer.position(0)
-
-        //fill buffer
-        for(p in plakList){
-
-            //fill buffer
-            colorsBuffer.put( color[0] ); colorsBuffer.put( color[0] ); colorsBuffer.put( color[0] )
-            colorsBuffer.put( color[1] ); colorsBuffer.put( color[1] ); colorsBuffer.put( color[1] )
-            colorsBuffer.put( color[2] ); colorsBuffer.put( color[2] ); colorsBuffer.put( color[2] )
-        }
-        vertexBuffer.position(0)
-    }
-
 
 
 
     //getters
+    fun getPosition()  = position
     fun getColor()     = color
     fun getPlaksNbr()  = plakList.size
     fun getPointsNbr() = 3 * getPlaksNbr()

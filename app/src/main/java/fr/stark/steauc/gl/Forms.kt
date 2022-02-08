@@ -97,7 +97,7 @@ class Forms {
                 )
             )
 
-           /* //back face
+           //back face
             plakList.add(
                 Plak(
                     XYZ(0f, 0f, depth), //E
@@ -181,7 +181,7 @@ class Forms {
                     XYZ(width, height, depth), //H
                     XYZ(width, 0f, depth)  //F
                 )
-            )*/
+            )
             return plakList
         }
     }
