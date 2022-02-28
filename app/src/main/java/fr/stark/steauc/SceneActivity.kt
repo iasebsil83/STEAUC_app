@@ -152,7 +152,7 @@ class SceneActivity : AppCompatActivity() {
             "Palm",
             PlakObject( Utils.readSTL(this, "palm.stl"), YELLOW),
             px=-0.5f, py=-0.5f, pz=-5f,
-            sx=0.1f, sy=0.1f, sz=0.1f
+            sx=0.01f, sy=0.01f, sz=0.01f
         )
 
         //hand

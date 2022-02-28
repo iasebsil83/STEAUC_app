@@ -6,6 +6,8 @@ import fr.stark.steauc.gl.*
 import fr.stark.steauc.log.CodeInfo
 import fr.stark.steauc.log.Error
 import fr.stark.steauc.log.Message
+import kotlin.math.cos
+import kotlin.math.sin
 
 
 
@@ -18,6 +20,20 @@ class Hand(givenName:String) {
 
     //name
     private val name = givenName
+
+    //movements trace
+    private var position = XYZ()
+    private var rotation = XYZ()
+    private var scale    = XYZ()
+
+    //finger positions
+    var THUMB_BASE_POSITION  = XYZ()
+    var INDEX_BASE_POSITION  = XYZ()
+    var MIDDLE_BASE_POSITION = XYZ()
+    var RING_BASE_POSITION   = XYZ()
+    var LITTLE_BASE_POSITION = XYZ()
+    var FINGER_BASE_SIZE = 1f
+    var FINGER_MID_SIZE  = 1f
 
     //palm
     private lateinit var palm : PlakObject
@@ -148,7 +164,128 @@ class Hand(givenName:String) {
         name+"_middle_end"
     )
 
-    fun scale(sX:Float, sY:Float, sZ:Float) {
-        //
+
+
+
+
+
+    // GENERAL MOVEMENTS
+
+    //translations
+    fun translate(dx:Float, dy:Float, dz:Float) {
+        palm.translate(dx, dy, dz)
+
+        thumb_base.translate(dx, dy, dz)
+        thumb_end.translate(dx, dy, dz)
+
+        index_base.translate(dx, dy, dz)
+        index_mid.translate(dx, dy, dz)
+        index_end.translate(dx, dy, dz)
+
+        middle_base.translate(dx, dy, dz)
+        middle_mid.translate(dx, dy, dz)
+        middle_end.translate(dx, dy, dz)
+
+        ring_base.translate(dx, dy, dz)
+        ring_mid.translate(dx, dy, dz)
+        ring_end.translate(dx, dy, dz)
+
+        little_base.translate(dx, dy, dz)
+        little_mid.translate(dx, dy, dz)
+        little_end.translate(dx, dy, dz)
+
+        //update position trace as well
+        position.x += dx
+        position.y += dy
+        position.z += dz
     }
+
+    fun translateX(dx:Float) = translate(dx, 0f, 0f)
+    fun translateY(dy:Float) = translate(0f, dy, 0f)
+    fun translateZ(dz:Float) = translate(0f, 0f, dz)
+
+
+
+    //rotations
+    fun rotate(angleX:Float, angleY:Float, angleZ:Float) {
+        rotateX(angleX)
+        rotateY(angleY)
+        rotateZ(angleZ)
+    }
+
+    fun rotateX(angleX:Float) {
+        val cosX = cos(angleX)
+        val sinX = sin(angleX)
+
+        //apply rotation X
+        palm.rotateX(position, cosX, sinX)
+
+        index_base.rotateX(position, cosX, sinX)
+        index_mid.rotateX(position, cosX, sinX)
+        index_end.rotateX(position, cosX, sinX)
+
+        //update rotation trace as well
+        rotation.x += angleX
+    }
+
+    fun rotateY(center:XYZ, angleY:Float) {
+        val cosY = cos(angleY)
+        val sinY = sin(angleY)
+
+        //apply rotation Y
+        isMoving = true
+        for(p in 0 until plakList.size){
+            plakList[p].p1.rotateY(center, cosY, sinY)
+            plakList[p].p2.rotateY(center, cosY, sinY)
+            plakList[p].p3.rotateY(center, cosY, sinY)
+        }
+        updateBuffers()
+        isMoving = false
+
+        //update rotation trace as well
+        rotation.y += angleY
+    }
+
+    fun rotateZ(center:XYZ, angleZ:Float) {
+        val cosZ = cos(angleZ)
+        val sinZ = sin(angleZ)
+
+        //apply rotation Z
+        isMoving = true
+        for(p in 0 until plakList.size) {
+            plakList[p].p1.rotateZ(center, cosZ, sinZ)
+            plakList[p].p2.rotateZ(center, cosZ, sinZ)
+            plakList[p].p3.rotateZ(center, cosZ, sinZ)
+        }
+        updateBuffers()
+        isMoving = false
+
+        //update rotation trace as well
+        rotation.z += angleZ
+    }
+
+
+
+    //scale
+    fun scale(scaleX:Float, scaleY:Float, scaleZ:Float) {
+
+        //apply scale
+        isMoving = true
+        for(p in 0 until plakList.size){
+            plakList[p].p1.scale(scaleX, scaleY, scaleZ)
+            plakList[p].p2.scale(scaleX, scaleY, scaleZ)
+            plakList[p].p3.scale(scaleX, scaleY, scaleZ)
+        }
+        updateBuffers()
+        isMoving = false
+
+        //update scale trace as well
+        scale.x += scaleX
+        scale.y += scaleY
+        scale.z += scaleZ
+    }
+
+    fun scaleX(scaleX:Float) = scale(scaleX, 1f, 1f)
+    fun scaleY(scaleY:Float) = scale(1f, scaleY, 1f)
+    fun scaleZ(scaleZ:Float) = scale(1f, 1f, scaleZ)
 }

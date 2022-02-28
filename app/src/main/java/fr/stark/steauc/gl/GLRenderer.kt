@@ -193,7 +193,9 @@ class GLRenderer(givenActivity:SceneActivity) : GLSurfaceView.Renderer {
 
         //draw elements
         for(e in elements) {
-            drawPlakObject(e)
+            if(!e.isMoving){
+                drawPlakObject(e)
+            }
         }
 
         // Draw a point to indicate the light.
@@ -456,9 +458,9 @@ class GLRenderer(givenActivity:SceneActivity) : GLSurfaceView.Renderer {
         }
 
         //apply placement
+        po.scale(sx,sy,sz, definitive=true)
         po.translate(px,py,pz, definitive=true)
         po.rotate(rx,ry,rz, definitive=true)
-        po.scale(sx,sy,sz, definitive=true)
 
         //add element
         elementsID.add(elements.size, name)
