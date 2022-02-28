@@ -24,7 +24,9 @@ class SettingsActivity : AppCompatActivity() {
     //init
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        info.setFunctionName("onCreate")
+        msg.function("onCreate")
+
+
 
         // LAYOUT
 

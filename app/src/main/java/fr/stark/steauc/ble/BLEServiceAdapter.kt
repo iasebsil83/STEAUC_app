@@ -106,7 +106,7 @@ class BLEServiceAdapter(
         flatPosition: Int,
         group: ExpandableGroup<*>
     ) {
-        info.setFunctionName("onBindGroupViewHolder")
+        msg.function("onBindGroupViewHolder")
 
         val title = BLEUUIDAttribute.getBLEAttributeFromUUID(group.title).title
         holder.serviceName.text = title
@@ -121,7 +121,7 @@ class BLEServiceAdapter(
         group: ExpandableGroup<*>,
         childIndex: Int
     ) {
-        info.setFunctionName("onBindChildViewHolder")
+        msg.function("onBindChildViewHolder")
         val characteristic: BluetoothGattCharacteristic = (group as BLEService).items[childIndex]
 
 
@@ -230,7 +230,7 @@ class BLEServiceAdapter(
         holder         : BLEServiceAdapter.CharacteristicViewHolder,
         characteristic : BluetoothGattCharacteristic
     ){
-        info.setFunctionName("readData")
+        msg.function("readData")
 
         //get data
         gatt?.readCharacteristic(characteristic)
@@ -330,7 +330,7 @@ class BLEServiceAdapter(
 
     //write
     private fun writeData(characteristic:BluetoothGattCharacteristic){
-        info.setFunctionName("writeData")
+        msg.function("writeData")
 
         //get layout elements
         val alertDialog = AlertDialog.Builder(givenScene)
@@ -388,7 +388,7 @@ class BLEServiceAdapter(
     private fun uint16ToInt16(value:Int) : Int = -(value and 0x07ff)
 
     private fun byteArrayToHexString(array: ByteArray): String {
-        info.setFunctionName("byteArrayToHexString")
+        msg.function("byteArrayToHexString")
         val result = StringBuilder(array.size * 2)
 
         //append character per character
@@ -403,7 +403,7 @@ class BLEServiceAdapter(
 
     //availability details on screen
     private fun setPropertiesString(property:Int) : StringBuilder {
-        info.setFunctionName("setPropertiesString")
+        msg.function("setPropertiesString")
 
         val sb = StringBuilder()
         if( (property and BluetoothGattCharacteristic.PROPERTY_WRITE) != 0) {

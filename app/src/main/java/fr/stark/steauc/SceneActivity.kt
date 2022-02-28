@@ -3,7 +3,6 @@ package fr.stark.steauc
 import android.bluetooth.*
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import fr.stark.steauc.ble.BLEService
 import fr.stark.steauc.ble.BLEServiceAdapter
@@ -14,28 +13,17 @@ import fr.stark.steauc.log.Message
 import fr.stark.steauc.gl.*
 
 
-
 //scene refresh
 const val UPDATE_SCENE_DELAY : Long = 100 //in ms
 
-// centralization
-val NEW_CENTER  = XYZ(-0.5f, -0.5f, 0f)
-
-//scene elements
-const val CUBE        = 0
-const val FINGER_END  = 1
-const val FINGER_MID  = 2
-const val FINGER_BASE = 3
-const val HAND        = 4
-const val FULL_HAND   = 5
-const val GROUND      = 6
-
 //actions
-const val TRANSLATE = 0
-const val ROTATE    = 1
-const val SCALE     = 2
+val ACTIONS = Ename(mapOf(
+    "TRANSLATE" to 0,
+    "ROTATE"    to 1,
+    "SCALE"     to 2
+))
 
-//action steps
+//steps
 const val TRANS_STEP  = 0.02f
 const val ANGLE_STEP  = 0.08f
 const val SCALE_STEP  = 1.05f
@@ -62,34 +50,20 @@ class SceneActivity : AppCompatActivity() {
     //binding
     private lateinit var binding : LyoSceneBinding
 
-    //scene elements
-    private var sceneElements : MutableList<PlakObject> = mutableListOf()
-
-    //camera
-    private val camPos = XYZ()
-    private val camRot = XYZ()
-    private val camSca = XYZ()
+    //OpenGL renderer
+    private lateinit var scene : GLRenderer
 
     //selection
-    private var selector      = 0
-    private val ELEMENT_NAMES = listOf(
-        "CUBE",
-        "FINGER_END",
-        "FINGER_MID",
-        "FINGER_BASE",
-        "HAND",
-        "FULL_HAND",
-        "GROUND"
-    )
+    private var selector = 0
 
     //actions
-    private var action       = 0
-    private val ACTION_NAMES = listOf(
-        "TRANSLATE",
-        "ROTATE",
-        "SCALE"
-    )
-    private var scales = mutableListOf<Float>()
+    private var action   = 0
+
+    //names
+    var NAMES = mutableListOf<String>()
+
+    //hand
+    private lateinit var steauc : Hand
 
 
 
@@ -97,7 +71,7 @@ class SceneActivity : AppCompatActivity() {
     //init
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        info.setFunctionName("onCreate")
+        msg.function("onCreate")
 
         //BLE
 
@@ -121,134 +95,169 @@ class SceneActivity : AppCompatActivity() {
 
         //init binding instance
         binding = LyoSceneBinding.inflate(layoutInflater)
-        GLRenderer.bindRenderer(this, binding.openglScene)
-        setContentView(binding.root)
 
-        //init default texts
-        binding.sceneSelect.text = ELEMENT_NAMES[0]
-        binding.sceneAction.text = ACTION_NAMES[0]
+        //set OpenGL context
+        scene = GLRenderer(this)
+        binding.openglScene.setEGLContextClientVersion(EGL_VERSION)
+        binding.openglScene.setRenderer(scene)
+        setContentView(binding.root)
 
 
 
         //3D SCENE
 
-        //target movement
-        binding.sceneSelect.setOnClickListener {
-            selector++
-            if(selector >= 5){
-                selector = 0
-            }
-            binding.sceneSelect.text = ELEMENT_NAMES[selector]
-        }
-        binding.sceneAction.setOnClickListener {
-            action++
-            if(action >= 3){
-                action = 0
-            }
-            binding.sceneAction.text = ACTION_NAMES[action]
-        }
+        //init hand
+        steauc = Hand("STEAUC")
 
-        //execute movement
-        binding.sceneLeft.setOnClickListener{
-            when(action) {
-                TRANSLATE -> sceneElements[selector].translateX(-TRANS_STEP)
-                ROTATE    -> sceneElements[selector].rotateY( sceneElements[selector].getPosition(), -ANGLE_STEP)
-                SCALE     -> sceneElements[selector].scaleX(1f/SCALE_STEP)
-            }
-        }
-        binding.sceneRight.setOnClickListener{
-            when(action) {
-                TRANSLATE -> sceneElements[selector].translateX(TRANS_STEP)
-                ROTATE    -> sceneElements[selector].rotateY( sceneElements[selector].getPosition(), ANGLE_STEP)
-                SCALE     -> sceneElements[selector].scaleX(SCALE_STEP)
-            }
-        }
-        binding.sceneDown.setOnClickListener{
-            when(action) {
-                TRANSLATE -> sceneElements[selector].translateY(-TRANS_STEP)
-                ROTATE    -> sceneElements[selector].rotateX( sceneElements[selector].getPosition(), -ANGLE_STEP)
-                SCALE     -> sceneElements[selector].scaleY(1/SCALE_STEP)
-            }
-        }
-        binding.sceneUp.setOnClickListener{
-            when(action) {
-                TRANSLATE -> sceneElements[selector].translateY(TRANS_STEP)
-                ROTATE    -> sceneElements[selector].rotateX( sceneElements[selector].getPosition(), ANGLE_STEP)
-                SCALE     -> sceneElements[selector].scaleY(SCALE_STEP)
-            }
-        }
+        //init elements NAMES
+        NAMES.add("Cube")
+        /*for(name in steauc.getElementsNames()) {
+            NAMES.add(name)
+        }*/
+        NAMES.add("Palm")
 
+        //init default texts
+        binding.sceneSelect.text = NAMES[selector]
+        binding.sceneAction.text = ACTIONS[action]
+        msg.log("HELLO")
+
+
+
+        //EVENTS
+
+        //bind buttons
+        bindButtonEvents()
     }
+
+
 
 
 
 
     //GRAPHICAL SCENE
+
+    //init
     fun initScene() : Long {
-        info.setFunctionName("initScene")
+        msg.function("initScene")
 
         //cube
-        sceneElements.add(PlakObject( Forms.Hexaedron(0.1f, 0.1f, 0.1f), CYAN))
-        sceneElements[CUBE].translate(-0.5f,-0.5f,0f, definitive=true)
+        scene.addElement(
+            "Cube",
+            PlakObject( Forms.Hexaedron(1f, 1f, 1f), CYAN),
+            px=-0.75f, py=0.75f, pz=-4.25f
+        )
 
-        //finger end
-        sceneElements.add(PlakObject( Utils.readSTL(this, "finger_end.stl"), BLUE))
-        sceneElements[FINGER_END].scale(0.001f, 0.001f, 0.001f, definitive=true)
-        sceneElements[FINGER_END].translate(-0.5f,-0.5f,0f, definitive=true)
-
-        //finger mid
-        sceneElements.add(PlakObject( Utils.readSTL(this, "finger_mid.stl"), MAGENTA))
-        sceneElements[FINGER_MID].scale(0.001f, 0.001f, 0.001f, definitive=true)
-        sceneElements[FINGER_MID].translate(-0.5f,-0.5f,0f, definitive=true)
-
-        //finger base
-        sceneElements.add(PlakObject( Utils.readSTL(this, "finger_base.stl"), RED))
-        sceneElements[FINGER_BASE].scale(0.001f, 0.001f, 0.001f, definitive=true)
-        sceneElements[FINGER_BASE].translate(-0.5f,-0.5f,0f, definitive=true)
+        //palm
+        scene.addElement(
+            "Palm",
+            PlakObject( Utils.readSTL(this, "palm.stl"), YELLOW),
+            px=-0.5f, py=-0.5f, pz=-5f,
+            sx=0.1f, sy=0.1f, sz=0.1f
+        )
 
         //hand
-        sceneElements.add(PlakObject( Utils.readSTL(this, "hand.stl"), YELLOW))
-        sceneElements[HAND].scale(0.001f, 0.001f, 0.001f, definitive=true)
-        sceneElements[HAND].translate(-0.5f,-0.5f,0f, definitive=true)
+        //steauc.addElements(this, scene)
 
-        //full hand
-        //sceneElements.add(PlakObject( Utils.readSTL(this, "full_hand.stl"), RED))
-        //scales.add(1f)
-        //sceneElements[FULL_HAND].scale(0.001f, 0.001f, 0.001f, definitive=true)
-
-        //ground
-        //sceneElements.add(PlakObject( Forms.Plane(2f,2f), GREEN))
-        //scales.add(1f)
-        //sceneElements[GROUND].translate(-1f,0f,0f, definitive=true)
+        //set cam point of view
+        //scene.zoomCam(0.001f, 0.001f, 0.001f)
+        //scene.translateCam(-0.5f, -0.5f, 0f)
 
         return UPDATE_SCENE_DELAY
     }
 
+    //loop
     fun updateScene(){
-        info.setFunctionName("updateScene")
-
-        //reset position
-
-        //rotation
-        /*sceneElements.forEach { e ->
-            e.rotate(0f, ANGLE_STEP, 0f)
-            e.translate(-0.5f, -0.5f, 0f)
-        }*/
+        msg.function("updateScene")
 
         //debug
         //msg.log("Update !")
     }
 
+    fun logState() {
+        msg.log("Pos${scene.getCamPos().print()}, Rot${scene.getCamRot().print()}, Sca${scene.getCamSca().print()}.")
+    }
 
 
 
-    //EXPANDABLE RECYCLER VIEW
+
+
+
+    //EVENTS
+
+    //bind buttons
+    fun bindButtonEvents() {
+
+        //target element & action
+        binding.sceneSelect.setOnClickListener {
+            selector++
+            if(selector >= NAMES.size){
+                selector = 0
+            }
+            binding.sceneSelect.text = NAMES[selector]
+        }
+        binding.sceneAction.setOnClickListener {
+            action++
+            if(action > 2){
+                action = 0
+            }
+            binding.sceneAction.text = ACTIONS[action]
+        }
+
+        //execute movement
+        binding.sceneLeft.setOnClickListener{
+            when(action) {
+                ACTIONS["TRANSLATE"] -> scene.getElement( NAMES[selector] ).translateX(-TRANS_STEP)
+                ACTIONS["ROTATE"]    -> scene.getElement( NAMES[selector] ).rotateY(
+                    scene.getElement( NAMES[selector] ).getPosition(),
+                    -ANGLE_STEP
+                )
+                ACTIONS["SCALE"]     -> scene.getElement( NAMES[selector] ).scaleX(1f/SCALE_STEP)
+            }
+        }
+        binding.sceneRight.setOnClickListener{
+            when(action) {
+                ACTIONS["TRANSLATE"] -> scene.getElement( NAMES[selector] ).translateX(TRANS_STEP)
+                ACTIONS["ROTATE"]    -> scene.getElement( NAMES[selector] ).rotateY(
+                    scene.getElement( NAMES[selector] ).getPosition(),
+                    ANGLE_STEP
+                )
+                ACTIONS["SCALE"]     -> scene.getElement( NAMES[selector] ).scaleX(SCALE_STEP)
+            }
+        }
+        binding.sceneDown.setOnClickListener{
+            when(action) {
+                ACTIONS["TRANSLATE"] -> scene.getElement( NAMES[selector] ).translateY(-TRANS_STEP)
+                ACTIONS["ROTATE"]    -> scene.getElement( NAMES[selector] ).rotateX(
+                    scene.getElement( NAMES[selector] ).getPosition(),
+                    -ANGLE_STEP
+                )
+                ACTIONS["SCALE"]     -> scene.getElement( NAMES[selector] ).scaleY(1/SCALE_STEP)
+            }
+        }
+        binding.sceneUp.setOnClickListener{
+            when(action) {
+                ACTIONS["TRANSLATE"] -> scene.getElement( NAMES[selector] ).translateY(TRANS_STEP)
+                ACTIONS["ROTATE"]    -> scene.getElement( NAMES[selector] ).rotateX(
+                    scene.getElement( NAMES[selector] ).getPosition(),
+                    ANGLE_STEP
+                )
+                ACTIONS["SCALE"]     -> scene.getElement( NAMES[selector] ).scaleY(SCALE_STEP)
+            }
+        }
+    }
+
+
+
+
+
+
+    //BLE PANEL
 
     //link all handlers with the adapter
     private val gattCallback = object : BluetoothGattCallback() {
 
         override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int){
-            info.setFunctionName("onConnectionStateChange")
+            msg.function("onConnectionStateChange")
 
             when(newState){
                 BluetoothProfile.STATE_CONNECTED -> {
@@ -267,7 +276,7 @@ class SceneActivity : AppCompatActivity() {
 
         override fun onCharacteristicRead(gatt:BluetoothGatt?, characteristic:BluetoothGattCharacteristic?, status:Int) {
             super.onCharacteristicRead(gatt, characteristic, status)
-            info.setFunctionName("onCharacteristicRead")
+            msg.function("onCharacteristicRead")
 
             runOnUiThread {
                 binding.bleServicesRecView.adapter?.notifyDataSetChanged()
@@ -276,7 +285,7 @@ class SceneActivity : AppCompatActivity() {
 
         override fun onCharacteristicWrite(gatt:BluetoothGatt?, characteristic:BluetoothGattCharacteristic?, status:Int) {
             super.onCharacteristicWrite(gatt, characteristic, status)
-            info.setFunctionName("onCharacteristicWrite")
+            msg.function("onCharacteristicWrite")
 
             runOnUiThread {
                 binding.bleServicesRecView.adapter?.notifyDataSetChanged()
@@ -284,7 +293,7 @@ class SceneActivity : AppCompatActivity() {
         }
         override fun onCharacteristicChanged(gatt:BluetoothGatt, characteristic:BluetoothGattCharacteristic) {
             super.onCharacteristicChanged(gatt, characteristic)
-            info.setFunctionName("onCharacteristicChanged")
+            msg.function("onCharacteristicChanged")
 
             runOnUiThread {
                 binding.bleServicesRecView.adapter?.notifyDataSetChanged()
@@ -293,15 +302,15 @@ class SceneActivity : AppCompatActivity() {
 
         override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
             super.onServicesDiscovered(gatt, status)
-            info.setFunctionName("onServicesDiscovered")
+            msg.function("onServicesDiscovered")
 
             runOnUiThread {
                 binding.bleServicesRecView.adapter = BLEServiceAdapter(
                     gatt,
-                    gatt?.services?.map {
+                    gatt?.services?.map { service ->
                         BLEService(
-                            it.uuid.toString(),
-                            it.characteristics
+                            service.uuid.toString(),
+                            service.characteristics
                         )
                     }?.toMutableList() ?: arrayListOf(), this@SceneActivity
                 )
@@ -309,16 +318,4 @@ class SceneActivity : AppCompatActivity() {
             }
         }
     }
-
-    fun logState() {
-        msg.log("Pos${camPos.print()}, Rot${camRot.print()}")
-    }
-
-
-
-    //getters
-    fun getSceneElements() = sceneElements
-    fun getPosition()      = camPos
-    fun getRotation()      = camRot
-    fun getScale()         = camSca
 }

@@ -13,13 +13,10 @@ import kotlin.math.sin
 
 open class PlakObject(plaks:MutableList<Plak>, givenColor:Color) {
 
-    //debug info
-    private val info : CodeInfo = CodeInfo("GL", "gl/PlakObject.kt")
-    private val msg  : Message  = Message(info)
-    private val err  : Error    = Error  (info)
-
     //position trace
     private var position = XYZ()
+    private var rotation = XYZ()
+    private var scale    = XYZ()
 
     //plaks
     protected var plakList        : MutableList<Plak> = plaks
@@ -34,7 +31,7 @@ open class PlakObject(plaks:MutableList<Plak>, givenColor:Color) {
     //buffers
     private var vertexBuffer : FloatBuffer = Utils.FloatBuffer(plakList.size * PLAK_STRIDE)
     private var normalBuffer : FloatBuffer = Utils.FloatBuffer(plakList.size * PLAK_STRIDE)
-    private var colorsBuffer : FloatBuffer = Utils.FloatBuffer(plakList.size * PLAK_STRIDE)
+    private var colorsBuffer : FloatBuffer = Utils.FloatBuffer(plakList.size * 4*XYZ_STRIDE)
 
     //color
     private val color = floatArrayOf(
@@ -44,19 +41,84 @@ open class PlakObject(plaks:MutableList<Plak>, givenColor:Color) {
         givenColor.getAlpha()
     )
 
-    //GLSL program
-    private val program : Int = GLRenderer.initProgram()
 
 
 
+
+
+    //BUFFERS
 
     //init
     init {
-
         //init buffers
         initColorsBuffer()
         updateBuffers()
     }
+
+    //colorsBuffer
+    private fun initColorsBuffer() {
+        colorsBuffer.position(0)
+
+        //fill buffers
+        for(p in plakList){
+            colorsBuffer.put( color[0] ); colorsBuffer.put( color[1] ); colorsBuffer.put( color[2] ); colorsBuffer.put( color[3] )
+            colorsBuffer.put( color[0] ); colorsBuffer.put( color[1] ); colorsBuffer.put( color[2] ); colorsBuffer.put( color[3] )
+            colorsBuffer.put( color[0] ); colorsBuffer.put( color[1] ); colorsBuffer.put( color[2] ); colorsBuffer.put( color[3] )
+        }
+        colorsBuffer.position(0)
+    }
+
+    //update buffers that depends on plakList (required at each plakList modification)
+    private fun updateBuffers() {
+        vertexBuffer.position(0)
+        normalBuffer.position(0)
+
+        //fill buffers
+        for(p in plakList){
+            val u = XYZ()
+            val v = XYZ()
+            var n = XYZ()
+
+            // Get or calcul normal values
+            if(p.n1.x != -1f){ // Normal value got from STL file (p.n1 same value as other)
+                n = p.n1
+            }
+            else{              // Normal value to calculate
+                u.x = p.p2.x - p.p1.x
+                u.y = p.p2.y - p.p1.y
+                u.z = p.p2.z - p.p1.z
+
+                v.x = p.p3.x - p.p1.x
+                v.y = p.p3.y - p.p1.y
+                v.z = p.p3.z - p.p1.z
+
+                n.x = u.y*v.z - u.z*v.y
+                n.y = u.z*v.x - u.x-v.z
+                n.z = u.x*v.y - u.y*v.x
+            }
+
+            //fill buffers
+            p.p1.also{ point ->
+                vertexBuffer.put( point.x ); normalBuffer.put( n.x )
+                vertexBuffer.put( point.y ); normalBuffer.put( n.y )
+                vertexBuffer.put( point.z ); normalBuffer.put( n.z )
+            }
+            p.p2.also{ point ->
+                vertexBuffer.put( point.x ); normalBuffer.put( n.x )
+                vertexBuffer.put( point.y ); normalBuffer.put( n.y )
+                vertexBuffer.put( point.z ); normalBuffer.put( n.z )
+            }
+            p.p3.also{ point ->
+                vertexBuffer.put( point.x ); normalBuffer.put( n.x )
+                vertexBuffer.put( point.y ); normalBuffer.put( n.y )
+                vertexBuffer.put( point.z ); normalBuffer.put( n.z )
+            }
+        }
+        vertexBuffer.position(0)
+        normalBuffer.position(0)
+    }
+
+
 
 
 
@@ -155,6 +217,9 @@ open class PlakObject(plaks:MutableList<Plak>, givenColor:Color) {
             plakList[p].p3.rotateX(center, cosX, sinX)
         }
         updateBuffers()
+
+        //update rotation trace as well
+        rotation.x += angleX
     }
 
     fun rotateY(angleY:Float, definitive:Boolean=false) = rotateY(
@@ -179,6 +244,9 @@ open class PlakObject(plaks:MutableList<Plak>, givenColor:Color) {
             plakList[p].p3.rotateY(center, cosY, sinY)
         }
         updateBuffers()
+
+        //update rotation trace as well
+        rotation.y += angleY
     }
 
     fun rotateZ(angleZ:Float, definitive:Boolean=false) = rotateZ(
@@ -203,6 +271,9 @@ open class PlakObject(plaks:MutableList<Plak>, givenColor:Color) {
             plakList[p].p3.rotateZ(center, cosZ, sinZ)
         }
         updateBuffers()
+
+        //update rotation trace as well
+        rotation.z += angleZ
     }
 
     //scale
@@ -222,6 +293,11 @@ open class PlakObject(plaks:MutableList<Plak>, givenColor:Color) {
             plakList[p].p3.scale(scaleX, scaleY, scaleZ)
         }
         updateBuffers()
+
+        //update scale trace as well
+        scale.x += scaleX
+        scale.y += scaleY
+        scale.z += scaleZ
     }
 
     fun scaleX(scaleX:Float, definitive:Boolean=false) = scale(
@@ -240,57 +316,18 @@ open class PlakObject(plaks:MutableList<Plak>, givenColor:Color) {
 
 
 
-    //BUFFERS
 
-    //colorsBuffer
-    private fun initColorsBuffer() {
-        colorsBuffer.position(0)
 
-        //fill buffers
-        for(p in plakList){
-            colorsBuffer.put( color[0] ); colorsBuffer.put( color[1] ); colorsBuffer.put( color[2] )
-            colorsBuffer.put( color[0] ); colorsBuffer.put( color[1] ); colorsBuffer.put( color[2] )
-            colorsBuffer.put( color[0] ); colorsBuffer.put( color[1] ); colorsBuffer.put( color[2] )
+    //UTILS
+
+    //print
+    fun print() : String {
+        var text = ""
+        for(pl in plakList){
+            text += "${pl.print()},\n"
         }
-        colorsBuffer.position(0)
+        return text
     }
-
-    //update buffers that depends on plakList (required at each plakList modification)
-    private fun updateBuffers() {
-        vertexBuffer.position(0)
-        normalBuffer.position(0)
-
-        //fill buffers
-        for(p in plakList){
-
-            //get normal vector (vectorial product)
-            val diff12 = p.p2 - p.p1
-            val diff13 = p.p3 - p.p1
-            var normal = XYZ.vectProd(diff12, diff13)
-
-            //fill buffers
-            p.p1.also{ point ->
-                vertexBuffer.put( point.x ); normalBuffer.put( normal.x )
-                vertexBuffer.put( point.y ); normalBuffer.put( normal.y )
-                vertexBuffer.put( point.z ); normalBuffer.put( normal.z )
-            }
-            p.p2.also{ point ->
-                vertexBuffer.put( point.x ); normalBuffer.put( normal.x )
-                vertexBuffer.put( point.y ); normalBuffer.put( normal.y )
-                vertexBuffer.put( point.z ); normalBuffer.put( normal.z )
-            }
-            p.p3.also{ point ->
-                vertexBuffer.put( point.x ); normalBuffer.put( normal.x )
-                vertexBuffer.put( point.y ); normalBuffer.put( normal.y )
-                vertexBuffer.put( point.z ); normalBuffer.put( normal.z )
-            }
-        }
-        vertexBuffer.position(0)
-        normalBuffer.position(0)
-    }
-
-
-
 
     //getters
     fun getPosition()  = position
@@ -298,7 +335,6 @@ open class PlakObject(plaks:MutableList<Plak>, givenColor:Color) {
     fun getPlaksNbr()  = plakList.size
     fun getPointsNbr() = 3 * getPlaksNbr()
     fun getCooNbr()    = 3 * getPointsNbr()
-    fun getProgram()   = program
 
     //getters (buffers)
     fun getVertexBuffer()      = vertexBuffer

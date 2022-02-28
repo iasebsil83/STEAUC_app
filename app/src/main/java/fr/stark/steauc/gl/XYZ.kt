@@ -36,15 +36,15 @@ class XYZ { // <=> vertex
 
 
     //movements
-    fun translate(dx:Float, dy:Float, dz:Float) {
-        x += dx
-        y += dy
-        z += dz
+    fun translate(tx:Float, ty:Float, tz:Float) {
+        x += tx
+        y += ty
+        z += tz
     }
-    fun rotate(center:XYZ, angleX:Float, angleY:Float, angleZ:Float) {
-        rotateX(center, angleX)
-        rotateY(center, angleY)
-        rotateZ(center, angleZ)
+    fun rotate(center:XYZ, rx:Float, ry:Float, rz:Float) {
+        rotateX(center, rx)
+        rotateY(center, ry)
+        rotateZ(center, rz)
     }
 
 
@@ -104,10 +104,10 @@ class XYZ { // <=> vertex
 
 
     //scale
-    fun scale(scaleX:Float, scaleY:Float, scaleZ:Float) {
-        x *= scaleX
-        y *= scaleY
-        z *= scaleZ
+    fun scale(sx:Float, sy:Float, sz:Float) {
+        x *= sx
+        y *= sy
+        z *= sz
     }
 
 

@@ -79,7 +79,7 @@ class Forms {
                 H(w, h, d)
             ------------------------------------------------ */
 
-            //FRONT - BACK
+
 
             //front face
             plakList.add(
@@ -92,78 +92,8 @@ class Forms {
             plakList.add(
                 Plak(
                     XYZ(width, 0f, 0f), //B
-                    XYZ(0f, height, 0f), //C
-                    XYZ(width, height, 0f)  //D
-                )
-            )
-
-           //back face
-            plakList.add(
-                Plak(
-                    XYZ(0f, 0f, depth), //E
-                    XYZ(width, 0f, depth), //F
-                    XYZ(0f, height, depth)  //G
-                )
-            )
-            plakList.add(
-                Plak(
-                    XYZ(width, 0f, depth), //F
-                    XYZ(0f, height, depth), //G
-                    XYZ(width, height, depth)  //H
-                )
-            )
-
-
-            //UP - DOWN
-
-            //up face
-            plakList.add(
-                Plak(
-                    XYZ(0f, 0f, 0f), //A
-                    XYZ(width, 0f, 0f), //B
-                    XYZ(0f, 0f, depth)  //E
-                )
-            )
-            plakList.add(
-                Plak(
-                    XYZ(width, 0f, 0f), //B
-                    XYZ(0f, 0f, depth), //E
-                    XYZ(width, 0f, depth)  //F
-                )
-            )
-
-            //down face
-            plakList.add(
-                Plak(
-                    XYZ(0f, height, 0f), //C
-                    XYZ(0f, height, depth), //G
-                    XYZ(width, height, 0f), //D
-                )
-            )
-            plakList.add(
-                Plak(
-                    XYZ(width, height, 0f), //D
-                    XYZ(0f, height, depth), //G
-                    XYZ(width, height, depth)  //H
-                )
-            )
-
-
-            //LEFT - RIGHT
-
-            //left face
-            plakList.add(
-                Plak(
-                    XYZ(0f, height, 0f), //C
-                    XYZ(0f, height, depth), //G
-                    XYZ(0f, 0f, 0f)  //A
-                )
-            )
-            plakList.add(
-                Plak(
-                    XYZ(0f, height, depth), //G
-                    XYZ(0f, 0f, 0f), //A
-                    XYZ(0f, 0f, depth)  //E
+                    XYZ(width, height, 0f),  //D
+                    XYZ(0f, height, 0f) //C
                 )
             )
 
@@ -178,10 +108,75 @@ class Forms {
             plakList.add(
                 Plak(
                     XYZ(width, 0f, 0f), //B
-                    XYZ(width, height, depth), //H
-                    XYZ(width, 0f, depth)  //F
+                    XYZ(width, 0f, depth),  //F
+                    XYZ(width, height, depth) //H
                 )
             )
+
+           //back face
+            plakList.add(
+                Plak(
+                    XYZ(0f, 0f, depth), //E
+                    XYZ(width, 0f, depth), //F
+                    XYZ(0f, height, depth)  //G
+                )
+            )
+            plakList.add(
+                Plak(
+                    XYZ(width, 0f, depth), //F
+                    XYZ(width, height, depth),  //H
+                    XYZ(0f, height, depth) //G
+                )
+            )
+
+            //left face
+            plakList.add(
+                Plak(
+                    XYZ(0f, height, 0f), //C
+                    XYZ(0f, height, depth), //G
+                    XYZ(0f, 0f, 0f)  //A
+                )
+            )
+            plakList.add(
+                Plak(
+                    XYZ(0f, height, depth), //G
+                    XYZ(0f, 0f, depth),  //E
+                    XYZ(0f, 0f, 0f) //A
+                )
+            )
+
+            //up face
+            plakList.add(
+                Plak(
+                    XYZ(0f, 0f, 0f), //A
+                    XYZ(width, 0f, 0f), //B
+                    XYZ(0f, 0f, depth)  //E
+                )
+            )
+            plakList.add(
+                Plak(
+                    XYZ(width, 0f, 0f), //B
+                    XYZ(width, 0f, depth),  //F
+                    XYZ(0f, 0f, depth) //E
+                )
+            )
+
+            //down face
+            plakList.add(
+                Plak(
+                    XYZ(0f, height, 0f), //C
+                    XYZ(0f, height, depth), //G
+                    XYZ(width, height, 0f), //D
+                )
+            )
+            plakList.add(
+                Plak(
+                    XYZ(width, height, 0f), //D
+                    XYZ(width, height, depth),  //H
+                    XYZ(0f, height, depth) //G
+                )
+            )
+
             return plakList
         }
     }

@@ -13,6 +13,11 @@ import fr.stark.steauc.databinding.LyoMenuBinding
 
 class MenuActivity : AppCompatActivity() {
 
+    //debug info
+    private val info : CodeInfo = CodeInfo("Main", "MenuActivity.kt")
+    private val msg  : Message  = Message(info)
+    private val err  : Error    = Error  (info)
+
     //binding
     private lateinit var binding : LyoMenuBinding
 
@@ -20,6 +25,8 @@ class MenuActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        msg.function("onCreate")
+
 
 
         // LAYOUT

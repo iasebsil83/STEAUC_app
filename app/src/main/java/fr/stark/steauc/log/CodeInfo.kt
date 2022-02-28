@@ -12,32 +12,28 @@ const val CODEINFO__FATAL_ERROR   = 2
 
 
 
-open class CodeInfo(
-    private var actorName: String,
-    private var fileName: String
-) {
+open class CodeInfo {
 
-    //function location
-    private var functionName: String = ""
-
+    //names
+    var actorName    : String
+    var fileName     : String
+    var functionName = ""
 
 
-    //alternative constructor (for setting all CodeInfo at once)
-    constructor(actorName:String, fileName:String, functionName:String) : this(actorName, fileName){
-        this.actorName    = actorName
-        this.fileName     = fileName
-        this.functionName = functionName
+
+    //init
+    constructor() {
+        actorName = "UNDEFINED"
+        fileName  = "UNDEFINED"
     }
 
+    constructor(givenActorName:String, givenFileName:String) {
+        actorName = givenActorName
+        fileName  = givenFileName
+    }
 
-
-    //getters
-    fun getActorName()    = actorName
-    fun getFileName()     = fileName
-    fun getFunctionName() = functionName
-
-    //setters
-    fun setFunctionName(name:String) {
+    //change current function name
+    fun function(name:String) {
         functionName = name
     }
 

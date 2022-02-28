@@ -2,15 +2,17 @@ package fr.stark.steauc.log
 
 import android.annotation.SuppressLint
 
-class Error(info: CodeInfo) : CodeInfo(
-    info.getActorName(),
-    info.getFileName(),
-    info.getFunctionName()
-) {
+class Error(info:CodeInfo) : CodeInfo() {
+
+    //init
+    init {
+        actorName = info.actorName
+        fileName  = info.fileName
+    }
 
     //log
     @SuppressLint("LongLogTag")
-    fun log(fatal: Boolean, message: String) {
+    fun log(fatal:Boolean, message:String) {
         when {
             //fatal error
             fatal -> {

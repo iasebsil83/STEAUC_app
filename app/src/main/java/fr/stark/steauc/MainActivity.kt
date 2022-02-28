@@ -25,7 +25,7 @@ class MainActivity : AppCompatActivity() {
     //init
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        info.setFunctionName("onCreate")
+        msg.function("onCreate")
 
 
         // LAYOUT
@@ -42,5 +42,6 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, MenuActivity::class.java)
             startActivity(intent)
         }
+        msg.log("hello")
     }
 }

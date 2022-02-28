@@ -64,7 +64,7 @@ class BLEScanActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        info.setFunctionName("onCreate")
+        msg.function("onCreate")
 
 
         // LAYOUT
@@ -111,7 +111,7 @@ class BLEScanActivity : AppCompatActivity() {
 
     @RequiresApi(Build.VERSION_CODES.M)
     private fun setBLEVariables() {
-        info.setFunctionName("setBLEVariables")
+        msg.function("setBLEVariables")
 
         BLEManager = getSystemService(BluetoothManager::class.java)
         BLEAdapter = BLEManager.adapter
@@ -125,7 +125,7 @@ class BLEScanActivity : AppCompatActivity() {
 
     // PERMISSIONS
     private fun promptEnableBluetooth() {
-        info.setFunctionName("promptEnableBluetooth")
+        msg.function("promptEnableBluetooth")
 
         //send request
         if(! (BLEAdapter!!.isEnabled) ){
@@ -143,7 +143,7 @@ class BLEScanActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        info.setFunctionName("onActivityResult")
+        msg.function("onActivityResult")
 
         when (requestCode) {
             BLE__REQUEST_ENABLE -> {
@@ -163,7 +163,7 @@ class BLEScanActivity : AppCompatActivity() {
     private val BLEScanCallback: ScanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             super.onScanResult(callbackType, result)
-            info.setFunctionName("onScanResult")
+            msg.function("onScanResult")
 
             //filter : do not get null-named devices
             if( !result.scanRecord?.deviceName.isNullOrEmpty() ) {
@@ -194,7 +194,7 @@ class BLEScanActivity : AppCompatActivity() {
 
     //start - stop
     private fun BLEStartScan() {
-        info.setFunctionName("BLEStartScan")
+        msg.function("BLEStartScan")
 
         //display
         binding.bleScanTitle.text = getString(R.string.ble_scan_pause_title);
@@ -223,7 +223,7 @@ class BLEScanActivity : AppCompatActivity() {
     }
 
     private fun BLEStopScan(){
-        info.setFunctionName("BLEStopScan")
+        msg.function("BLEStopScan")
 
         //display
         binding.bleScanTitle.text = getString(R.string.ble_scan_play_title);
@@ -244,7 +244,7 @@ class BLEScanActivity : AppCompatActivity() {
 
     // DISPLAY
     private fun BLEUpdateRecView(){
-        info.setFunctionName("BLEUpdateRecView")
+        msg.function("BLEUpdateRecView")
 
         //update recycler view
         binding.bleScanRecView.layoutManager = LinearLayoutManager(this)
