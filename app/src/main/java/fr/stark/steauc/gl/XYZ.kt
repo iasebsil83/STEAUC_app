@@ -112,37 +112,60 @@ class XYZ { // <=> vertex
 
 
 
-    //basic operations
-    operator fun plus(p:XYZ) : XYZ = XYZ(
+    //basic internal operations
+    operator fun plus(p:XYZ) = XYZ(
         x + p.x,
         y + p.y,
         z + p.z
     )
 
-    operator fun minus(p:XYZ) : XYZ = XYZ(
+    operator fun minus(p:XYZ) = XYZ(
         x - p.x,
         y - p.y,
         z - p.z
     )
 
-    operator fun times(p:XYZ) : XYZ = XYZ(
+    operator fun times(p:XYZ) = XYZ(
         x * p.x,
         y * p.y,
         z * p.z
     )
 
-    operator fun div(p:XYZ) : XYZ = XYZ(
+    operator fun div(p:XYZ) = XYZ(
         x / p.x,
         y / p.y,
         z / p.z
     )
 
+    //basic external operations
+    operator fun plus(f:Float) = XYZ(
+        x + f,
+        y + f,
+        z + f
+    )
+
+    operator fun minus(f:Float) = XYZ(
+        x - f,
+        y - f,
+        z - f
+    )
+
+    operator fun times(f:Float) = XYZ(
+        x * f,
+        y * f,
+        z * f
+    )
+
+    operator fun div(f:Float) = XYZ(
+        x / f,
+        y / f,
+        z / f
+    )
+
 
 
     //display
-    fun print() : String {
-        return "($x,$y,$z)"
-    }
+    fun toStr() = "($x,$y,$z)"
 
 
 
@@ -150,14 +173,14 @@ class XYZ { // <=> vertex
     companion object {
 
         //scalar
-        fun scalProd(p1:XYZ, p2:XYZ) : Float = (
+        fun scalProd(p1:XYZ, p2:XYZ) = (
                 p1.x*p2.x +
                 p1.y*p2.y +
                 p1.z*p2.z
         )
 
         //vectorial product
-        fun vectProd(p1:XYZ, p2:XYZ) : XYZ = XYZ(
+        fun vectProd(p1:XYZ, p2:XYZ) = XYZ(
             p1.y * p2.z - p2.y * p1.z,
             p1.z * p2.x - p2.z * p1.x,
             p1.x * p2.y - p2.x * p1.y

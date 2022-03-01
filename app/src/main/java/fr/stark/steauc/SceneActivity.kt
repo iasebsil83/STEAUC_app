@@ -59,9 +59,6 @@ class SceneActivity : AppCompatActivity() {
     //actions
     private var action   = 0
 
-    //names
-    var NAMES = mutableListOf<String>()
-
     //hand
     private lateinit var steauc : Hand
 
@@ -109,17 +106,9 @@ class SceneActivity : AppCompatActivity() {
         //init hand
         steauc = Hand("STEAUC")
 
-        //init elements NAMES
-        NAMES.add("Cube")
-        /*for(name in steauc.getElementsNames()) {
-            NAMES.add(name)
-        }*/
-        NAMES.add("Palm")
-
         //init default texts
-        binding.sceneSelect.text = NAMES[selector]
+        binding.sceneSelect.text = "N/A"
         binding.sceneAction.text = ACTIONS[action]
-        msg.log("HELLO")
 
 
 
@@ -143,20 +132,16 @@ class SceneActivity : AppCompatActivity() {
         //cube
         scene.addElement(
             "Cube",
-            PlakObject( Forms.Hexaedron(1f, 1f, 1f), CYAN),
-            px=-0.75f, py=0.75f, pz=-4.25f
-        )
-
-        //palm
-        scene.addElement(
-            "Palm",
-            PlakObject( Utils.readSTL(this, "palm.stl"), YELLOW),
-            px=-0.5f, py=-0.5f, pz=-5f,
-            sx=0.01f, sy=0.01f, sz=0.01f
+            PlakObject( Forms.Cube(0.1f), CYAN ),
+            py=0.1f
         )
 
         //hand
-        //steauc.addElements(this, scene)
+        steauc.addElements(
+            this, scene,
+            px=-0.5f, py=-0.5f, pz=-5f,
+            sx=0.01f, sy=0.01f, sz=0.01f
+        )
 
         //set cam point of view
         //scene.zoomCam(0.001f, 0.001f, 0.001f)
@@ -174,7 +159,7 @@ class SceneActivity : AppCompatActivity() {
     }
 
     fun logState() {
-        msg.log("Pos${scene.getCamPos().print()}, Rot${scene.getCamRot().print()}, Sca${scene.getCamSca().print()}.")
+        msg.log("Pos${scene.getCamPos().toStr()}, Rot${scene.getCamRot().toStr()}, Sca${scene.getCamSca().toStr()}.")
     }
 
 
@@ -188,13 +173,6 @@ class SceneActivity : AppCompatActivity() {
     fun bindButtonEvents() {
 
         //target element & action
-        binding.sceneSelect.setOnClickListener {
-            selector++
-            if(selector >= NAMES.size){
-                selector = 0
-            }
-            binding.sceneSelect.text = NAMES[selector]
-        }
         binding.sceneAction.setOnClickListener {
             action++
             if(action > 2){
@@ -206,42 +184,30 @@ class SceneActivity : AppCompatActivity() {
         //execute movement
         binding.sceneLeft.setOnClickListener{
             when(action) {
-                ACTIONS["TRANSLATE"] -> scene.getElement( NAMES[selector] ).translateX(-TRANS_STEP)
-                ACTIONS["ROTATE"]    -> scene.getElement( NAMES[selector] ).rotateY(
-                    scene.getElement( NAMES[selector] ).getPosition(),
-                    -ANGLE_STEP
-                )
-                ACTIONS["SCALE"]     -> scene.getElement( NAMES[selector] ).scaleX(1f/SCALE_STEP)
+                ACTIONS["TRANSLATE"] -> steauc.translateX(-TRANS_STEP)
+                ACTIONS["ROTATE"]    -> steauc.rotateY(-ANGLE_STEP)
+                ACTIONS["SCALE"]     -> steauc.scaleX(1f/SCALE_STEP)
             }
         }
         binding.sceneRight.setOnClickListener{
             when(action) {
-                ACTIONS["TRANSLATE"] -> scene.getElement( NAMES[selector] ).translateX(TRANS_STEP)
-                ACTIONS["ROTATE"]    -> scene.getElement( NAMES[selector] ).rotateY(
-                    scene.getElement( NAMES[selector] ).getPosition(),
-                    ANGLE_STEP
-                )
-                ACTIONS["SCALE"]     -> scene.getElement( NAMES[selector] ).scaleX(SCALE_STEP)
+                ACTIONS["TRANSLATE"] -> steauc.translateX(TRANS_STEP)
+                ACTIONS["ROTATE"]    -> steauc.rotateY(ANGLE_STEP)
+                ACTIONS["SCALE"]     -> steauc.scaleX(SCALE_STEP)
             }
         }
         binding.sceneDown.setOnClickListener{
             when(action) {
-                ACTIONS["TRANSLATE"] -> scene.getElement( NAMES[selector] ).translateY(-TRANS_STEP)
-                ACTIONS["ROTATE"]    -> scene.getElement( NAMES[selector] ).rotateX(
-                    scene.getElement( NAMES[selector] ).getPosition(),
-                    -ANGLE_STEP
-                )
-                ACTIONS["SCALE"]     -> scene.getElement( NAMES[selector] ).scaleY(1/SCALE_STEP)
+                ACTIONS["TRANSLATE"] -> steauc.translateY(-TRANS_STEP)
+                ACTIONS["ROTATE"]    -> steauc.rotateX(-ANGLE_STEP)
+                ACTIONS["SCALE"]     -> steauc.scaleY(1f/SCALE_STEP)
             }
         }
         binding.sceneUp.setOnClickListener{
             when(action) {
-                ACTIONS["TRANSLATE"] -> scene.getElement( NAMES[selector] ).translateY(TRANS_STEP)
-                ACTIONS["ROTATE"]    -> scene.getElement( NAMES[selector] ).rotateX(
-                    scene.getElement( NAMES[selector] ).getPosition(),
-                    ANGLE_STEP
-                )
-                ACTIONS["SCALE"]     -> scene.getElement( NAMES[selector] ).scaleY(SCALE_STEP)
+                ACTIONS["TRANSLATE"] -> steauc.translateY(TRANS_STEP)
+                ACTIONS["ROTATE"]    -> steauc.rotateX(ANGLE_STEP)
+                ACTIONS["SCALE"]     -> steauc.scaleY(SCALE_STEP)
             }
         }
     }

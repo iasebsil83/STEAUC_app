@@ -179,5 +179,7 @@ class Forms {
 
             return plakList
         }
+
+        fun Cube(size:Float) = Hexaedron(size, size, size)
     }
 }

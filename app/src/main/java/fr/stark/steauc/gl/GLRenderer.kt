@@ -21,17 +21,33 @@ import javax.microedition.khronos.opengles.GL10
 const val EGL_VERSION : Int = 3
 
 //shaders
-const val vertexShaderCode =
-    "attribute vec4 vPosition;"  +
-    "void main() {"              +
-    "  gl_Position = vPosition;" +
-    "}"
-const val fragmentShaderCode =
-    "precision mediump float;" +
-    "uniform vec4 vColor;"     +
-    "void main() {"            +
-    "  gl_FragColor = vColor;" +
-    "}"
+const val VERTEX_SHADER = """
+    uniform mat4 u_MVPMatrix;
+    uniform mat4 u_MVMatrix;
+    uniform vec3 u_LightPos;
+    attribute vec4 a_Position;
+    attribute vec4 a_Color;
+    attribute vec3 a_Normal;
+    varying vec4 v_Color;
+    void main(){
+       vec3 modelViewVertex = vec3(u_MVMatrix * a_Position);
+       vec3 modelViewNormal = vec3(u_MVMatrix * vec4(a_Normal, 0.0));
+       float distance       = length(u_LightPos - modelViewVertex);
+       vec3 lightVector     = normalize(u_LightPos - modelViewVertex);
+       float diffuse        = max(dot(modelViewNormal, lightVector), 0.1);
+       diffuse              = diffuse * (1.0 / (1.0 + (0.25 * distance * distance)));
+       v_Color              = a_Color * diffuse;
+       gl_Position          = u_MVPMatrix * a_Position;
+   }
+"""
+
+const val FRAGMENT_SHADER = """
+    precision mediump float;
+    varying vec4 v_Color;
+    void main(){
+       gl_FragColor = v_Color;
+    }
+"""
 
 
 
@@ -82,7 +98,7 @@ class GLRenderer(givenActivity:SceneActivity) : GLSurfaceView.Renderer {
 
     //program handlers
     private var perVertexProgramHandle = 0
-    private var pointProgramHandle = 0
+    private var pointProgramHandle     = 0
 
     //shaders
     private val pointVertexShader = """
@@ -124,38 +140,23 @@ class GLRenderer(givenActivity:SceneActivity) : GLSurfaceView.Renderer {
         // Enable depth testing
         GLES30.glEnable(GLES30.GL_DEPTH_TEST)
 
-        // Position the eye in front of the origin
-        val eyeX = 0.0f
-        val eyeY = 0.0f
-        val eyeZ = -0.5f
-
-        // We are looking toward the distance
-        val lookX = 0.0f
-        val lookY = 0.0f
-        val lookZ = -5.0f
-
-        // Set our up vector. This is where our head would be pointing were we holding the camera
-        val upX = 0.0f
-        val upY = 1.0f
-        val upZ = 0.0f
-
-        Matrix.setLookAtM(viewMatrix, 0, eyeX, eyeY, eyeZ, lookX, lookY, lookZ, upX, upY, upZ)
+        //set point of view
+        Matrix.setLookAtM(
+            viewMatrix, 0,
+            0f, 0f, 0f,
+            0f, 0f, -5f,
+            0f, 1f, 0f
+        )
 
         // Set shaders
-        val vertexShader         = getVertexShader()
-        val fragmentShader       = getFragmentShader()
-        val vertexShaderHandle   = compileShader(GLES30.GL_VERTEX_SHADER, vertexShader)
-        val fragmentShaderHandle = compileShader(GLES30.GL_FRAGMENT_SHADER, fragmentShader)
         perVertexProgramHandle   = createAndLinkProgram(
-            vertexShaderHandle,
-            fragmentShaderHandle,
+            compileShader(GLES30.GL_VERTEX_SHADER,   VERTEX_SHADER),
+            compileShader(GLES30.GL_FRAGMENT_SHADER, FRAGMENT_SHADER),
             arrayOf("a_Position", "a_Color", "a_Normal")
         )
-        val pointVertexShaderHandle   = compileShader(GLES30.GL_VERTEX_SHADER, pointVertexShader)
-        val pointFragmentShaderHandle = compileShader(GLES30.GL_FRAGMENT_SHADER, pointFragmentShader)
         pointProgramHandle            = createAndLinkProgram(
-            pointVertexShaderHandle,
-            pointFragmentShaderHandle,
+            compileShader(GLES30.GL_VERTEX_SHADER,   pointVertexShader),
+            compileShader(GLES30.GL_FRAGMENT_SHADER, pointFragmentShader),
             arrayOf("a_Position")
         )
     }
@@ -169,10 +170,6 @@ class GLRenderer(givenActivity:SceneActivity) : GLSurfaceView.Renderer {
 
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT or GLES30.GL_DEPTH_BUFFER_BIT)
 
-        // Do a complete rotation every 10 seconds.
-        val time           = SystemClock.uptimeMillis() % 10000L
-        val angleInDegrees = 360.0f / 10000.0f * time.toInt()
-
         GLES30.glUseProgram(perVertexProgramHandle) // Draw program
 
         // Set program handles for drawing
@@ -185,9 +182,7 @@ class GLRenderer(givenActivity:SceneActivity) : GLSurfaceView.Renderer {
 
         // Calculate position of the light. Rotate and then push into the distance.
         Matrix.setIdentityM(lightModelMatrix, 0)
-        Matrix.translateM(lightModelMatrix, 0, 0.0f, 0.0f, -2.0f)
-        Matrix.rotateM(lightModelMatrix, 0, angleInDegrees, 0.0f, 1.0f, 0.0f);
-        Matrix.translateM(lightModelMatrix, 0, 0.0f, 0.0f, 2.0f);
+        Matrix.translateM(lightModelMatrix, 0, 0.0f, 0.0f, -3.0f)
         Matrix.multiplyMV(lightPosInWorldSpace, 0, lightModelMatrix, 0, lightPosInModelSpace, 0)
         Matrix.multiplyMV(lightPosInEyeSpace, 0, viewMatrix, 0, lightPosInWorldSpace, 0)
 
@@ -198,7 +193,7 @@ class GLRenderer(givenActivity:SceneActivity) : GLSurfaceView.Renderer {
             }
         }
 
-        // Draw a point to indicate the light.
+        //draw a point to indicate the light
         GLES30.glUseProgram(pointProgramHandle)
         drawLight()
     }
@@ -206,10 +201,10 @@ class GLRenderer(givenActivity:SceneActivity) : GLSurfaceView.Renderer {
     override fun onSurfaceChanged(unused: GL10, width: Int, height: Int) {
         msg.function("onSurfaceChanged")
 
-        // Set the OpenGL viewport to the same size as the surface.
+        //set the OpenGL viewport to the same size as the surface.
         GLES30.glViewport(0, 0, width, height)
 
-        // Create new perspective projection matrix (height will stay the same / width vary as per aspect ratio
+        //create new perspective projection matrix (height will stay the same / width vary as per aspect ratio)
         val ratio = width.toFloat() / height
         val left = -ratio
         val bottom = -1.0f
@@ -227,15 +222,15 @@ class GLRenderer(givenActivity:SceneActivity) : GLSurfaceView.Renderer {
     private fun compileShader(shaderType: Int, shaderSource: String): Int {
         var shaderHandle = GLES30.glCreateShader(shaderType)
         if (shaderHandle != 0) {
-            // Pass in the shader source & compile it
+            //pass in the shader source & compile it
             GLES30.glShaderSource(shaderHandle, shaderSource)
             GLES30.glCompileShader(shaderHandle)
 
-            // Get the compilation status.
+            //get the compilation status
             val compileStatus = IntArray(1)
             GLES30.glGetShaderiv(shaderHandle, GLES30.GL_COMPILE_STATUS, compileStatus, 0)
 
-            // If the compilation failed, delete the shader.
+            //if the compilation failed, delete the shader
             if (compileStatus[0] == 0) {
                 Log.e(
                     "error",
@@ -253,11 +248,11 @@ class GLRenderer(givenActivity:SceneActivity) : GLSurfaceView.Renderer {
     private fun createAndLinkProgram(vertexShaderHandle: Int, fragmentShaderHandle: Int, attributes: Array<String>?): Int {
         var programHandle = GLES30.glCreateProgram()
         if (programHandle != 0) {
-            // Bind the vertex & fragment shader to the program.
+            //bind the vertex & fragment shader to the program
             GLES30.glAttachShader(programHandle, vertexShaderHandle)
             GLES30.glAttachShader(programHandle, fragmentShaderHandle)
 
-            // Bind attributes
+            //bind attributes
             if (attributes != null) {
                 val size = attributes.size
                 for (i in 0 until size) {
@@ -265,10 +260,10 @@ class GLRenderer(givenActivity:SceneActivity) : GLSurfaceView.Renderer {
                 }
             }
 
-            // Link the two shaders together into a program.
+            //link the two shaders together into a program
             GLES30.glLinkProgram(programHandle)
 
-            // Get the link status.
+            //get the link status
             val linkStatus = IntArray(1)
             GLES30.glGetProgramiv(programHandle, GLES30.GL_LINK_STATUS, linkStatus, 0)
             if (linkStatus[0] == 0) {
@@ -288,61 +283,26 @@ class GLRenderer(givenActivity:SceneActivity) : GLSurfaceView.Renderer {
 
 
 
-    // Shaders
-    private fun getVertexShader(): String {
-        return """
-            uniform mat4 u_MVPMatrix;
-            uniform mat4 u_MVMatrix;
-            uniform vec3 u_LightPos;
-            attribute vec4 a_Position;
-            attribute vec4 a_Color;
-            attribute vec3 a_Normal;
-            varying vec4 v_Color;
-            void main(){
-               vec3 modelViewVertex = vec3(u_MVMatrix * a_Position);
-               vec3 modelViewNormal = vec3(u_MVMatrix * vec4(a_Normal, 0.0));
-               float distance       = length(u_LightPos - modelViewVertex);
-               vec3 lightVector     = normalize(u_LightPos - modelViewVertex);
-               float diffuse        = max(dot(modelViewNormal, lightVector), 0.1);
-               diffuse              = diffuse * (1.0 / (1.0 + (0.25 * distance * distance)));
-               v_Color              = a_Color * diffuse;
-               gl_Position          = u_MVPMatrix * a_Position;
-            }
-        """
-    }
-
-    private fun getFragmentShader(): String {
-        return """
-            precision mediump float;
-            varying vec4 v_Color;
-            void main(){
-               gl_FragColor = v_Color;
-            }
-        """
-    }
-
-
-
     // Drawing
     private fun drawLight() {
         val pointMVPMatrixHandle = GLES30.glGetUniformLocation(pointProgramHandle, "u_MVPMatrix")
         val pointPositionHandle = GLES30.glGetAttribLocation(pointProgramHandle, "a_Position")
 
-        // Pass in the position
+        //pass in the position
         GLES30.glVertexAttrib3f(
             pointPositionHandle,
             lightPosInModelSpace[0], lightPosInModelSpace[1], lightPosInModelSpace[2]
         )
 
-        // Since we are not using a buffer object, disable vertex arrays for this attribute.
+        //since we are not using a buffer object, disable vertex arrays for this attribute
         GLES30.glDisableVertexAttribArray(pointPositionHandle)
 
-        // Pass in the transformation matrix.
+        //pass in the transformation matrix
         Matrix.multiplyMM(MVPMatrix, 0, viewMatrix, 0, lightModelMatrix, 0)
         Matrix.multiplyMM(MVPMatrix, 0, projectionMatrix, 0, MVPMatrix, 0)
         GLES30.glUniformMatrix4fv(pointMVPMatrixHandle, 1, false, MVPMatrix, 0)
 
-        // Draw the point.
+        //draw the point
         GLES30.glDrawArrays(GLES30.GL_POINTS, 0, 1)
     }
 
@@ -385,21 +345,21 @@ class GLRenderer(givenActivity:SceneActivity) : GLSurfaceView.Renderer {
         )
         GLES30.glEnableVertexAttribArray(normalHandle)
 
-        // Get MVP matrix & pass in the modelview matrix (with MVP matrix = view matrix * model matrix)
+        //get MVP matrix & pass in the modelview matrix (with MVP matrix = view matrix * model matrix)
         Matrix.multiplyMM(MVPMatrix, 0, viewMatrix, 0, modelMatrix, 0)
         GLES30.glUniformMatrix4fv(MVMatrixHandle, 1, false, MVPMatrix, 0)
 
-        // Get MVP matrix & pass in the combined matrix (with MVP matrix = modelview matrix * projection matrix)
+        //get MVP matrix & pass in the combined matrix (with MVP matrix = modelview matrix * projection matrix)
         Matrix.multiplyMM(MVPMatrix, 0, projectionMatrix, 0, MVPMatrix, 0)
         GLES30.glUniformMatrix4fv(MVPMatrixHandle, 1, false, MVPMatrix, 0)
 
-        // Pass in the light position in eye space.
+        //pass in the light position in eye space
         GLES30.glUniform3f(
             lightPosHandle,
             lightPosInEyeSpace[0], lightPosInEyeSpace[1], lightPosInEyeSpace[2]
         )
 
-        // Draw the plak
+        //draw the plak
         GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0, po.getCooNbr())
     }
 
@@ -413,24 +373,30 @@ class GLRenderer(givenActivity:SceneActivity) : GLSurfaceView.Renderer {
     //movements
     fun translateCam(tx:Float, ty:Float, tz:Float) {
         for(e in elements){
-            e.translate(tx, ty, tz)
+            e.translate(tx, ty, tz, trace=false)
         }
+
+        //keep camera trace only (scene elements are not really moving)
         camPos.x += tx
         camPos.y += ty
         camPos.z += tz
     }
     fun rotateCam(rx:Float, ry:Float, rz:Float) {
         for(e in elements){
-            e.rotate(rx, ry, rz)
+            e.rotate(rx, ry, rz, trace=false)
         }
+
+        //keep camera trace only (scene elements are not really moving)
         camRot.x += rx
         camRot.y += ry
         camRot.z += rz
     }
     fun zoomCam(sx:Float, sy:Float, sz:Float) {
         for(e in elements){
-            e.scale(sx, sz, sz)
+            e.scale(sx, sz, sz, trace=false)
         }
+
+        //keep camera trace only (scene elements are not really moving)
         camSca.x *= sx
         camSca.y *= sy
         camSca.z *= sz
@@ -457,10 +423,10 @@ class GLRenderer(givenActivity:SceneActivity) : GLSurfaceView.Renderer {
             return
         }
 
-        //apply placement
-        po.scale(sx,sy,sz, definitive=true)
-        po.translate(px,py,pz, definitive=true)
-        po.rotate(rx,ry,rz, definitive=true)
+        //apply definitive placements
+        po.scaleDefinitive(sx,sy,sz)
+        po.rotateDefinitive(rx,ry,rz)
+        po.translateDefinitive(px,py,pz)
 
         //add element
         elementsID.add(elements.size, name)
@@ -468,13 +434,13 @@ class GLRenderer(givenActivity:SceneActivity) : GLSurfaceView.Renderer {
     }
 
     fun addElements(
-        elem:Map<String,PlakObject>,
+        elem:Map<String, PlakObject>,
         px:Float=0f, py:Float=0f, pz:Float=0f,
         rx:Float=0f, ry:Float=0f, rz:Float=0f,
         sx:Float=1f, sy:Float=1f, sz:Float=1f
     ) {
         for(e in elem) {
-            this.addElement(
+            addElement(
                 e.key, e.value,
                 px=px, py=py, pz=pz,
                 rx=rx, ry=ry, rz=rz,

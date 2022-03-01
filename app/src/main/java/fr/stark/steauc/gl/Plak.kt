@@ -55,5 +55,5 @@ class Plak{
 
 
     //print
-    fun print() = "{ ${p1.print()}, ${p1.print()}, ${p1.print()} }"
+    fun toStr() = "{ ${p1.toStr()}, ${p1.toStr()}, ${p1.toStr()} }"
 }

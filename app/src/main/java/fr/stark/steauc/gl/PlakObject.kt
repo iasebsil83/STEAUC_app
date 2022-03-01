@@ -16,7 +16,7 @@ open class PlakObject(plaks:MutableList<Plak>, givenColor:Color) {
     //movements trace
     private var position = XYZ()
     private var rotation = XYZ()
-    private var scale    = XYZ()
+    private var scale    = XYZ(1f, 1f, 1f)
             var isMoving = false
 
     //plaks
@@ -53,7 +53,7 @@ open class PlakObject(plaks:MutableList<Plak>, givenColor:Color) {
     init {
         //init buffers
         initColorsBuffer()
-        updateBuffers()
+        updatePositionBuffers()
     }
 
     //colorsBuffer
@@ -70,7 +70,7 @@ open class PlakObject(plaks:MutableList<Plak>, givenColor:Color) {
     }
 
     //update buffers that depends on plakList (required at each plakList modification)
-    private fun updateBuffers() {
+    private fun updatePositionBuffers() {
         vertexBuffer.position(0)
         normalBuffer.position(0)
 
@@ -126,9 +126,278 @@ open class PlakObject(plaks:MutableList<Plak>, givenColor:Color) {
 
     //GENERAL MOVEMENTS
 
-    //reset
-    fun resetPosition(alsoBuffers:Boolean=false) {
+    //translations
+    fun translate(
+        dx:Float, dy:Float, dz:Float,
+        updateBuffers:Boolean=true, trace:Boolean=true
+    ) {
+        isMoving = true
+        for(p in 0 until plakList.size){
+            plakList[p].p1.translate(dx, dy, dz)
+            plakList[p].p2.translate(dx, dy, dz)
+            plakList[p].p3.translate(dx, dy, dz)
+        }
 
+        //update buffers if asked
+        if(updateBuffers) {
+            updatePositionBuffers()
+        }
+        isMoving = false
+
+        //update position trace as well
+        if(trace) {
+            position.x += dx
+            position.y += dy
+            position.z += dz
+        }
+    }
+
+    fun translate(p:XYZ, updateBuffers:Boolean=true, trace:Boolean=false)    = translate(
+        p.x, p.y, p.z,
+        updateBuffers=updateBuffers, trace=trace
+    )
+    fun translateX(dx:Float, updateBuffers:Boolean=true, trace:Boolean=true) = translate(
+        dx, 0f, 0f,
+        updateBuffers=updateBuffers, trace=trace
+    )
+    fun translateY(dy:Float, updateBuffers:Boolean=true, trace:Boolean=true) = translate(
+        0f, dy, 0f,
+        updateBuffers=updateBuffers, trace=trace
+    )
+    fun translateZ(dz:Float, updateBuffers:Boolean=true, trace:Boolean=true) = translate(
+        0f, 0f, dz,
+        updateBuffers=updateBuffers, trace=trace
+    )
+
+
+
+    //rotations
+    fun rotate(
+        angleX:Float, angleY:Float, angleZ:Float,
+        updateBuffers:Boolean=true, trace:Boolean=true
+    ) = rotate(
+        XYZ(),
+        angleX, angleY, angleZ,
+        updateBuffers=updateBuffers, trace=trace
+    )
+    fun rotate(
+        center:XYZ,
+        angleX:Float, angleY:Float, angleZ:Float,
+        updateBuffers:Boolean=true, trace:Boolean=true
+    ) {
+        rotateX(center, angleX, trace=trace, updateBuffers=updateBuffers)
+        rotateY(center, angleY, trace=trace, updateBuffers=updateBuffers)
+        rotateZ(center, angleZ, trace=trace, updateBuffers=updateBuffers)
+    }
+
+    fun rotateX(center:XYZ, angleX:Float, trace:Boolean=true, updateBuffers:Boolean=true) {
+        val cosX = cos(angleX)
+        val sinX = sin(angleX)
+
+        //apply rotation X
+        isMoving = true
+        for(p in 0 until plakList.size){
+            plakList[p].p1.rotateX(center, cosX, sinX)
+            plakList[p].p2.rotateX(center, cosX, sinX)
+            plakList[p].p3.rotateX(center, cosX, sinX)
+        }
+
+        //update buffers if asked
+        if(updateBuffers) {
+            updatePositionBuffers()
+        }
+        isMoving = false
+
+        //update traces as well
+        if(trace) {
+            position.rotateX(center, angleX)
+            rotation.x += angleX
+        }
+    }
+
+    fun rotateY(center:XYZ, angleY:Float, trace:Boolean=true, updateBuffers:Boolean=true) {
+        val cosY = cos(angleY)
+        val sinY = sin(angleY)
+
+        //apply rotation Y
+        isMoving = true
+        for(p in 0 until plakList.size){
+            plakList[p].p1.rotateY(center, cosY, sinY)
+            plakList[p].p2.rotateY(center, cosY, sinY)
+            plakList[p].p3.rotateY(center, cosY, sinY)
+        }
+
+        //update buffers if asked
+        if(updateBuffers) {
+            updatePositionBuffers()
+        }
+        isMoving = false
+
+        //update traces as well
+        if(trace) {
+            position.rotateY(center, angleY)
+            rotation.y += angleY
+        }
+    }
+
+    fun rotateZ(center:XYZ, angleZ:Float, trace:Boolean=true, updateBuffers:Boolean=true) {
+        val cosZ = cos(angleZ)
+        val sinZ = sin(angleZ)
+
+        //apply rotation Z
+        isMoving = true
+        for(p in 0 until plakList.size) {
+            plakList[p].p1.rotateZ(center, cosZ, sinZ)
+            plakList[p].p2.rotateZ(center, cosZ, sinZ)
+            plakList[p].p3.rotateZ(center, cosZ, sinZ)
+        }
+
+        //update buffers if asked
+        if(updateBuffers) {
+            updatePositionBuffers()
+        }
+        isMoving = false
+
+        //update traces as well
+        if(trace) {
+            position.rotateZ(center, angleZ)
+            rotation.z += angleZ
+        }
+    }
+
+    fun rotate(p:XYZ, updateBuffers:Boolean=true, trace:Boolean=false)        = rotate(
+        p.x, p.y, p.z,
+        updateBuffers=updateBuffers, trace=trace
+    )
+    fun rotateX(angleX:Float, updateBuffers:Boolean=true, trace:Boolean=true) = rotateX(
+        XYZ(), angleX,
+        updateBuffers=updateBuffers, trace=trace
+    )
+    fun rotateY(angleY:Float, updateBuffers:Boolean=true, trace:Boolean=true) = rotateY(
+        XYZ(), angleY,
+        updateBuffers=updateBuffers, trace=trace
+    )
+    fun rotateZ(angleZ:Float, updateBuffers:Boolean=true, trace:Boolean=true) = rotateZ(
+        XYZ(), angleZ,
+        updateBuffers=updateBuffers, trace=trace
+    )
+
+
+
+    //scale
+    fun scale(sx:Float, sy:Float, sz:Float, updateBuffers:Boolean=true, trace:Boolean=true) {
+        isMoving = true
+        for(p in 0 until plakList.size){
+            plakList[p].p1.scale(sx, sy, sz)
+            plakList[p].p2.scale(sx, sy, sz)
+            plakList[p].p3.scale(sx, sy, sz)
+        }
+
+        //update buffers if asked
+        if(updateBuffers) {
+            updatePositionBuffers()
+        }
+        isMoving = false
+
+        //update scale trace as well
+        if(trace) {
+            scale.x *= sx
+            scale.y *= sy
+            scale.z *= sz
+        }
+    }
+
+    fun scale(p:XYZ, updateBuffers:Boolean=true, trace:Boolean=false)        = scale(
+        p.x, p.y, p.z,
+        updateBuffers=updateBuffers, trace=trace
+    )
+    fun scaleX(scaleX:Float, updateBuffers:Boolean=true, trace:Boolean=true) = scale(
+        scaleX, 1f, 1f,
+        updateBuffers=updateBuffers, trace=trace
+    )
+    fun scaleY(scaleY:Float, updateBuffers:Boolean=true, trace:Boolean=true) = scale(
+        1f, scaleY, 1f,
+        updateBuffers=updateBuffers, trace=trace
+    )
+    fun scaleZ(scaleZ:Float, updateBuffers:Boolean=true, trace:Boolean=true) = scale(
+        1f, 1f, scaleZ,
+        updateBuffers=updateBuffers, trace=trace
+    )
+
+
+
+
+
+
+    //DEFINITIVE MOVEMENTS
+
+    //translate
+    fun translateDefinitive(dx:Float, dy:Float, dz:Float) {
+        for(p in 0 until defaultPlakList.size){
+            defaultPlakList[p].p1.translate(dx, dy, dz)
+            defaultPlakList[p].p2.translate(dx, dy, dz)
+            defaultPlakList[p].p3.translate(dx, dy, dz)
+        }
+        updatePositionBuffers()
+
+        //also translate normally (without keeping trace)
+        translate(dx, dy, dz, trace=false)
+    }
+
+    //rotate
+    fun rotateDefinitive(angleX:Float, angleY:Float, angleZ:Float) {
+        val cosX   = cos(angleX)
+        val sinX   = sin(angleX)
+        val cosY   = cos(angleY)
+        val sinY   = sin(angleY)
+        val cosZ   = cos(angleZ)
+        val sinZ   = sin(angleZ)
+        val center = XYZ()
+
+        //apply rotations
+        for(p in 0 until defaultPlakList.size) {
+            defaultPlakList[p].p1.rotateX(center, cosX, sinX)
+            defaultPlakList[p].p2.rotateX(center, cosX, sinX)
+            defaultPlakList[p].p3.rotateX(center, cosX, sinX)
+
+            defaultPlakList[p].p1.rotateY(center, cosY, sinY)
+            defaultPlakList[p].p2.rotateY(center, cosY, sinY)
+            defaultPlakList[p].p3.rotateY(center, cosY, sinY)
+
+            defaultPlakList[p].p1.rotateZ(center, cosZ, sinZ)
+            defaultPlakList[p].p2.rotateZ(center, cosZ, sinZ)
+            defaultPlakList[p].p3.rotateZ(center, cosZ, sinZ)
+        }
+        updatePositionBuffers()
+
+        //also translate normally (without keeping trace)
+        rotate(angleX, angleY, angleZ, trace=false)
+    }
+
+    //scale
+    fun scaleDefinitive(sx:Float, sy:Float, sz:Float) {
+        for(p in 0 until defaultPlakList.size){
+            defaultPlakList[p].p1.scale(sx, sy, sz)
+            defaultPlakList[p].p2.scale(sx, sy, sz)
+            defaultPlakList[p].p3.scale(sx, sy, sz)
+        }
+        updatePositionBuffers()
+
+        //also translate normally (without keeping trace)
+        scale(sx, sy, sz, trace=false)
+    }
+
+
+
+    //RESET MOVEMENTS
+
+    //reset position/rotation/scale
+    fun reset(
+        keepPosition:Boolean=false,
+        keepRotation:Boolean=false,
+        keepScale:Boolean=false,
+        updateBuffers:Boolean=false
+    ) {
         //reset plakList using defaultPlakList
         for(p in 0 until defaultPlakList.size){
             plakList[p].p1.x = defaultPlakList[p].p1.x
@@ -144,124 +413,28 @@ open class PlakObject(plaks:MutableList<Plak>, givenColor:Color) {
             plakList[p].p3.z = defaultPlakList[p].p3.z
         }
 
-        //updateBuffers() can be skipped if other actions will be performed on plakList
-        if(alsoBuffers) {
-            updateBuffers()
+        //restore position/rotation/scale
+        if(keepPosition) {
+            translate(position, trace=false, updateBuffers=false)
+        }else{
+            position = XYZ()
+        }
+        if(keepRotation) {
+            rotate(rotation, trace=false, updateBuffers=false)
+        }else{
+            rotation = XYZ()
+        }
+        if(keepScale) {
+            scale(scale, trace=false, updateBuffers=false)
+        }else{
+            scale = XYZ()
+        }
+
+        //update buffers if required (at the end only)
+        if(updateBuffers){
+            updatePositionBuffers()
         }
     }
-
-    //translations
-    fun translate(dx:Float, dy:Float, dz:Float) {
-        isMoving = true
-        for(p in 0 until plakList.size){
-            plakList[p].p1.translate(dx, dy, dz)
-            plakList[p].p2.translate(dx, dy, dz)
-            plakList[p].p3.translate(dx, dy, dz)
-        }
-        updateBuffers()
-        isMoving = false
-
-        //update position trace as well
-        position.x += dx
-        position.y += dy
-        position.z += dz
-    }
-
-    fun translateX(dx:Float) = translate(dx, 0f, 0f)
-    fun translateY(dy:Float) = translate(0f, dy, 0f)
-    fun translateZ(dz:Float) = translate(0f, 0f, dz)
-
-
-
-    //rotations
-    fun rotate(angleX:Float, angleY:Float, angleZ:Float) = rotate( XYZ(), angleX, angleY, angleZ )
-    fun rotate(center:XYZ, angleX:Float, angleY:Float, angleZ:Float) {
-        rotateX(center, angleX)
-        rotateY(center, angleY)
-        rotateZ(center, angleZ)
-    }
-
-    fun rotateX(angleX:Float) = rotateX( XYZ(), angleX )
-    fun rotateX(center:XYZ, angleX:Float) {
-        val cosX = cos(angleX)
-        val sinX = sin(angleX)
-
-        //apply rotation X
-        isMoving = true
-        for(p in 0 until plakList.size){
-            plakList[p].p1.rotateX(center, cosX, sinX)
-            plakList[p].p2.rotateX(center, cosX, sinX)
-            plakList[p].p3.rotateX(center, cosX, sinX)
-        }
-        updateBuffers()
-        isMoving = false
-
-        //update rotation trace as well
-        rotation.x += angleX
-    }
-
-    fun rotateY(angleY:Float) = rotateY( XYZ(), angleY )
-    fun rotateY(center:XYZ, angleY:Float) {
-        val cosY = cos(angleY)
-        val sinY = sin(angleY)
-
-        //apply rotation Y
-        isMoving = true
-        for(p in 0 until plakList.size){
-            plakList[p].p1.rotateY(center, cosY, sinY)
-            plakList[p].p2.rotateY(center, cosY, sinY)
-            plakList[p].p3.rotateY(center, cosY, sinY)
-        }
-        updateBuffers()
-        isMoving = false
-
-        //update rotation trace as well
-        rotation.y += angleY
-    }
-
-    fun rotateZ(angleZ:Float) = rotateZ( XYZ(), angleZ )
-    fun rotateZ(center:XYZ, angleZ:Float) {
-        val cosZ = cos(angleZ)
-        val sinZ = sin(angleZ)
-
-        //apply rotation Z
-        isMoving = true
-        for(p in 0 until plakList.size) {
-            plakList[p].p1.rotateZ(center, cosZ, sinZ)
-            plakList[p].p2.rotateZ(center, cosZ, sinZ)
-            plakList[p].p3.rotateZ(center, cosZ, sinZ)
-        }
-        updateBuffers()
-        isMoving = false
-
-        //update rotation trace as well
-        rotation.z += angleZ
-    }
-
-
-
-    //scale
-    fun scale(scaleX:Float, scaleY:Float, scaleZ:Float) {
-
-        //apply scale
-        isMoving = true
-        for(p in 0 until plakList.size){
-            plakList[p].p1.scale(scaleX, scaleY, scaleZ)
-            plakList[p].p2.scale(scaleX, scaleY, scaleZ)
-            plakList[p].p3.scale(scaleX, scaleY, scaleZ)
-        }
-        updateBuffers()
-        isMoving = false
-
-        //update scale trace as well
-        scale.x += scaleX
-        scale.y += scaleY
-        scale.z += scaleZ
-    }
-
-    fun scaleX(scaleX:Float) = scale(scaleX, 1f, 1f)
-    fun scaleY(scaleY:Float) = scale(1f, scaleY, 1f)
-    fun scaleZ(scaleZ:Float) = scale(1f, 1f, scaleZ)
 
 
 
@@ -270,11 +443,11 @@ open class PlakObject(plaks:MutableList<Plak>, givenColor:Color) {
 
     //UTILS
 
-    //print
-    fun print() : String {
+    //to string
+    fun toStr() : String {
         var text = ""
         for(pl in plakList){
-            text += "${pl.print()},\n"
+            text += "${pl.toStr()},\n"
         }
         return text
     }
