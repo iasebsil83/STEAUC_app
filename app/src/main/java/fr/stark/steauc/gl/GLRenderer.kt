@@ -49,6 +49,28 @@ const val FRAGMENT_SHADER = """
     }
 """
 
+const val POINT_VERTEX_SHADER = """
+    uniform mat4 u_MVPMatrix;
+    attribute vec4 a_Position;
+    void main(){
+       gl_Position = u_MVPMatrix * a_Position;
+       gl_PointSize = 5.0;
+    }
+"""
+
+const val POINT_FRAGMENT_SHADER = """
+    precision mediump float;
+    void main(){
+       gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+    }
+"""
+
+//frustum
+const val FRUSTUM_BOTTOM = -1f
+const val FRUSTUM_TOP    =  1f
+const val FRUSTUM_NEAR   =  1f
+const val FRUSTUM_FAR    = 10f
+
 
 
 
@@ -65,26 +87,26 @@ class GLRenderer(givenActivity:SceneActivity) : GLSurfaceView.Renderer {
     //camera
     private val camPos = XYZ()
     private val camRot = XYZ()
-    private val camSca = XYZ()
+    private val camSca = XYZ(1f, 1f, 1f)
 
     //scene elements
     private var elements   : MutableList<PlakObject> = mutableListOf()
     private var elementsID                           = Ename()
 
     //matrices
-    private val modelMatrix      = FloatArray(16) // Used to move models from object space to world space.
-    private val viewMatrix       = FloatArray(16) // Like camera, used to transforms world space to eye space
-    private val projectionMatrix = FloatArray(16) // Project scene onto 2D viewport
-    private val MVPMatrix        = FloatArray(16) // Final combined matrix (passed for shader program
-    private val lightModelMatrix = FloatArray(16) // Use to store copy of model matrix for light position
+    private val modelMatrix      = FloatArray(16) //used to move models from object space to world space.
+    private val viewMatrix       = FloatArray(16) //like camera, used to transforms world space to eye space
+    private val projectionMatrix = FloatArray(16) //project scene onto 2D viewport
+    private val MVPMatrix        = FloatArray(16) //final combined matrix (passed for shader program
+    private val lightModelMatrix = FloatArray(16) //use to store copy of model matrix for light position
 
     //buffers handlers
-    private var MVPMatrixHandle = 0 // Used to pass in the transformation matrix
-    private var MVMatrixHandle  = 0 // Used to pass in the modelview matrix
-    private var lightPosHandle  = 0 // Used to pass in the light position
-    private var positionHandle  = 0 // Used to pass in model position
-    private var colorHandle     = 0 // User to pass in model color
-    private var normalHandle    = 0 // Used to pass in model normal
+    private var MVPMatrixHandle = 0 //used to pass in the transformation matrix
+    private var MVMatrixHandle  = 0 //used to pass in the modelview matrix
+    private var lightPosHandle  = 0 //used to pass in the light position
+    private var positionHandle  = 0 //used to pass in model position
+    private var colorHandle     = 0 //user to pass in model color
+    private var normalHandle    = 0 //used to pass in model normal
 
     //data size
     private val POS_DATA_SIZE  = 3
@@ -92,39 +114,22 @@ class GLRenderer(givenActivity:SceneActivity) : GLSurfaceView.Renderer {
     private val NORM_DATA_SIZE = 3
 
     //light handlers
-    private val lightPosInModelSpace = floatArrayOf(0.0f, 0.0f, 0.0f, 1.0f) // Hold light centered on the origin in model space (4th coord needed -> multiplication with transform matrices
-    private val lightPosInWorldSpace = FloatArray(4)                   // Hold current pos of the light in world space (after transformation via model matrix)
-    private val lightPosInEyeSpace   = FloatArray(4)                   // Hold the transformed pos of the light in eye space (after transformation via modelview matrix)
+    private val lightPosInModelSpace = floatArrayOf(1f, 0f, -2f, 1f) //hold light centered on the origin in model space (4th coord needed -> multiplication with transform matrices
+    private val lightPosInWorldSpace = FloatArray(4)                   //hold current pos of the light in world space (after transformation via model matrix)
+    private val lightPosInEyeSpace   = FloatArray(4)                   //hold the transformed pos of the light in eye space (after transformation via modelview matrix)
 
     //program handlers
     private var perVertexProgramHandle = 0
     private var pointProgramHandle     = 0
 
-    //shaders
-    private val pointVertexShader = """
-        uniform mat4 u_MVPMatrix;
-        attribute vec4 a_Position;
-        void main(){
-           gl_Position = u_MVPMatrix * a_Position;
-           gl_PointSize = 5.0;
-        }
-    """
-
-    private val pointFragmentShader = """
-        precision mediump float;
-        void main(){
-           gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
-        }
-    """
-
 
 
 
     //init
-    override fun onSurfaceCreated(unused: GL10, config: EGLConfig) {
+    override fun onSurfaceCreated(unused:GL10, config:EGLConfig) {
         msg.function("onSurfaceCreated")
 
-        //Set the background frame color
+        //set the background frame color
         GLES30.glClearColor(0.3f, 0.3f, 0.3f, 1.0f)
 
         //launch timed updates (delay is returned from the initScene() call)
@@ -134,7 +139,7 @@ class GLRenderer(givenActivity:SceneActivity) : GLSurfaceView.Renderer {
             }
         }, 0, activity.initScene())
 
-        // Use culling to remove back faces (optimisation)
+        //use culling to remove back faces (optimisation)
         //GLES30.glEnable(GLES30.GL_CULL_FACE)
 
         // Enable depth testing
@@ -148,15 +153,15 @@ class GLRenderer(givenActivity:SceneActivity) : GLSurfaceView.Renderer {
             0f, 1f, 0f
         )
 
-        // Set shaders
-        perVertexProgramHandle   = createAndLinkProgram(
+        //set shaders
+        perVertexProgramHandle = createAndLinkProgram(
             compileShader(GLES30.GL_VERTEX_SHADER,   VERTEX_SHADER),
             compileShader(GLES30.GL_FRAGMENT_SHADER, FRAGMENT_SHADER),
             arrayOf("a_Position", "a_Color", "a_Normal")
         )
-        pointProgramHandle            = createAndLinkProgram(
-            compileShader(GLES30.GL_VERTEX_SHADER,   pointVertexShader),
-            compileShader(GLES30.GL_FRAGMENT_SHADER, pointFragmentShader),
+        pointProgramHandle = createAndLinkProgram(
+            compileShader(GLES30.GL_VERTEX_SHADER,   POINT_VERTEX_SHADER),
+            compileShader(GLES30.GL_FRAGMENT_SHADER, POINT_FRAGMENT_SHADER),
             arrayOf("a_Position")
         )
     }
@@ -165,14 +170,14 @@ class GLRenderer(givenActivity:SceneActivity) : GLSurfaceView.Renderer {
 
 
     //graphic updates
-    override fun onDrawFrame(unused: GL10) {
+    override fun onDrawFrame(unused:GL10) {
         msg.function("onDrawFrame")
 
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT or GLES30.GL_DEPTH_BUFFER_BIT)
 
         GLES30.glUseProgram(perVertexProgramHandle) // Draw program
 
-        // Set program handles for drawing
+        //set program handles for drawing
         MVPMatrixHandle = GLES30.glGetUniformLocation(perVertexProgramHandle, "u_MVPMatrix")
         MVMatrixHandle  = GLES30.glGetUniformLocation(perVertexProgramHandle, "u_MVMatrix")
         lightPosHandle  = GLES30.glGetUniformLocation(perVertexProgramHandle, "u_LightPos")
@@ -180,9 +185,8 @@ class GLRenderer(givenActivity:SceneActivity) : GLSurfaceView.Renderer {
         colorHandle     = GLES30.glGetAttribLocation(perVertexProgramHandle, "a_Color")
         normalHandle    = GLES30.glGetAttribLocation(perVertexProgramHandle, "a_Normal")
 
-        // Calculate position of the light. Rotate and then push into the distance.
+        //calculate position of the light. Rotate and then push into the distance.
         Matrix.setIdentityM(lightModelMatrix, 0)
-        Matrix.translateM(lightModelMatrix, 0, 0.0f, 0.0f, -3.0f)
         Matrix.multiplyMV(lightPosInWorldSpace, 0, lightModelMatrix, 0, lightPosInModelSpace, 0)
         Matrix.multiplyMV(lightPosInEyeSpace, 0, viewMatrix, 0, lightPosInWorldSpace, 0)
 
@@ -198,28 +202,29 @@ class GLRenderer(givenActivity:SceneActivity) : GLSurfaceView.Renderer {
         drawLight()
     }
 
-    override fun onSurfaceChanged(unused: GL10, width: Int, height: Int) {
+    override fun onSurfaceChanged(unused:GL10, width:Int, height:Int) {
         msg.function("onSurfaceChanged")
 
         //set the OpenGL viewport to the same size as the surface.
         GLES30.glViewport(0, 0, width, height)
 
-        //create new perspective projection matrix (height will stay the same / width vary as per aspect ratio)
-        val ratio = width.toFloat() / height
-        val left = -ratio
-        val bottom = -1.0f
-        val top = 1.0f
-        val near = 1.0f
-        val far = 10.0f
+        //create new perspective projection matrix
+        val FRUSTRUM_RIGHT = width.toFloat()/height
+        val FRUSTRUM_LEFT = -FRUSTRUM_RIGHT
 
-        Matrix.frustumM(projectionMatrix, 0, left, ratio, bottom, top, near, far)
+        Matrix.frustumM(
+            projectionMatrix, 0,
+            FRUSTRUM_LEFT,  FRUSTRUM_RIGHT,
+            FRUSTUM_BOTTOM, FRUSTUM_TOP,
+            FRUSTUM_NEAR,   FRUSTUM_FAR
+        )
     }
 
 
 
 
     // Shaders tools
-    private fun compileShader(shaderType: Int, shaderSource: String): Int {
+    private fun compileShader(shaderType:Int, shaderSource:String) : Int {
         var shaderHandle = GLES30.glCreateShader(shaderType)
         if (shaderHandle != 0) {
             //pass in the shader source & compile it
@@ -245,9 +250,11 @@ class GLRenderer(givenActivity:SceneActivity) : GLSurfaceView.Renderer {
         }
         return shaderHandle
     }
-    private fun createAndLinkProgram(vertexShaderHandle: Int, fragmentShaderHandle: Int, attributes: Array<String>?): Int {
+
+    private fun createAndLinkProgram(vertexShaderHandle:Int, fragmentShaderHandle:Int, attributes:Array<String>?) : Int {
         var programHandle = GLES30.glCreateProgram()
         if (programHandle != 0) {
+
             //bind the vertex & fragment shader to the program
             GLES30.glAttachShader(programHandle, vertexShaderHandle)
             GLES30.glAttachShader(programHandle, fragmentShaderHandle)
@@ -267,10 +274,7 @@ class GLRenderer(givenActivity:SceneActivity) : GLSurfaceView.Renderer {
             val linkStatus = IntArray(1)
             GLES30.glGetProgramiv(programHandle, GLES30.GL_LINK_STATUS, linkStatus, 0)
             if (linkStatus[0] == 0) {
-                Log.e(
-                    "error",
-                    "Error compiling program: " + GLES30.glGetProgramInfoLog(programHandle)
-                )
+                err.log(CODEINFO__RUNTIME_ERROR, "Error compiling program (" + GLES30.glGetProgramInfoLog(programHandle) + ")")
                 GLES30.glDeleteProgram(programHandle)
                 programHandle = 0
             }
@@ -306,7 +310,7 @@ class GLRenderer(givenActivity:SceneActivity) : GLSurfaceView.Renderer {
         GLES30.glDrawArrays(GLES30.GL_POINTS, 0, 1)
     }
 
-    private fun drawPlakObject(po: PlakObject){
+    private fun drawPlakObject(po:PlakObject){
         Matrix.setIdentityM(modelMatrix, 0)
 
         //set vertex buffer

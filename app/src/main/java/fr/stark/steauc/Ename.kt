@@ -17,6 +17,7 @@ class Ename {
         for(assos in associations) {
             names.add(   assos.key   )
             indexes.add( assos.value )
+            length++
         }
     }
 

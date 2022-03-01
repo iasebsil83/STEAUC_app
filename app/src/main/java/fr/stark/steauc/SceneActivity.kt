@@ -19,13 +19,12 @@ const val UPDATE_SCENE_DELAY : Long = 100 //in ms
 //actions
 val ACTIONS = Ename(mapOf(
     "TRANSLATE" to 0,
-    "ROTATE"    to 1,
-    "SCALE"     to 2
+    "ROTATE"    to 1
 ))
 
 //steps
 const val TRANS_STEP  = 0.02f
-const val ANGLE_STEP  = 0.08f
+const val ANGLE_STEP  = 0.09f
 const val SCALE_STEP  = 1.05f
 
 
@@ -52,9 +51,6 @@ class SceneActivity : AppCompatActivity() {
 
     //OpenGL renderer
     private lateinit var scene : GLRenderer
-
-    //selection
-    private var selector = 0
 
     //actions
     private var action   = 0
@@ -175,7 +171,7 @@ class SceneActivity : AppCompatActivity() {
         //target element & action
         binding.sceneAction.setOnClickListener {
             action++
-            if(action > 2){
+            if(action >= ACTIONS.length){
                 action = 0
             }
             binding.sceneAction.text = ACTIONS[action]
@@ -186,28 +182,24 @@ class SceneActivity : AppCompatActivity() {
             when(action) {
                 ACTIONS["TRANSLATE"] -> steauc.translateX(-TRANS_STEP)
                 ACTIONS["ROTATE"]    -> steauc.rotateY(-ANGLE_STEP)
-                ACTIONS["SCALE"]     -> steauc.scaleX(1f/SCALE_STEP)
             }
         }
         binding.sceneRight.setOnClickListener{
             when(action) {
                 ACTIONS["TRANSLATE"] -> steauc.translateX(TRANS_STEP)
                 ACTIONS["ROTATE"]    -> steauc.rotateY(ANGLE_STEP)
-                ACTIONS["SCALE"]     -> steauc.scaleX(SCALE_STEP)
             }
         }
         binding.sceneDown.setOnClickListener{
             when(action) {
                 ACTIONS["TRANSLATE"] -> steauc.translateY(-TRANS_STEP)
                 ACTIONS["ROTATE"]    -> steauc.rotateX(-ANGLE_STEP)
-                ACTIONS["SCALE"]     -> steauc.scaleY(1f/SCALE_STEP)
             }
         }
         binding.sceneUp.setOnClickListener{
             when(action) {
                 ACTIONS["TRANSLATE"] -> steauc.translateY(TRANS_STEP)
                 ACTIONS["ROTATE"]    -> steauc.rotateX(ANGLE_STEP)
-                ACTIONS["SCALE"]     -> steauc.scaleY(SCALE_STEP)
             }
         }
     }

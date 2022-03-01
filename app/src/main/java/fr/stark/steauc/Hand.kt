@@ -1,14 +1,10 @@
 package fr.stark.steauc
 
 import android.content.Context
-import fr.stark.steauc.Utils
 import fr.stark.steauc.gl.*
 import fr.stark.steauc.log.CodeInfo
 import fr.stark.steauc.log.Error
 import fr.stark.steauc.log.Message
-import kotlin.math.cos
-import kotlin.math.sin
-
 
 
 class Hand(givenName:String) {
@@ -24,18 +20,18 @@ class Hand(givenName:String) {
     //movements trace
     private var position = XYZ()
     private var rotation = XYZ()
-    private var scale    = XYZ()
+    private var scale    = XYZ(1f, 1f, 1f)
 
     //finger base positions (from palm)
-    var thumb_bPos  = XYZ(-30f, -10f, 0f)
-    var index_bPos  = XYZ(-30f, 20f, 0f)
-    var middle_bPos = XYZ(-10f, 20f, 0f)
-    var ring_bPos   = XYZ(10f, 20f, 0f)
-    var little_bPos = XYZ(30f, 20f, 0f)
+    var thumb_bPos  = XYZ(-10f, 45f, 13f)
+    var index_bPos  = XYZ(28f, 145.5f, 13f)
+    var middle_bPos = XYZ(56.2f, 145.5f, 13f)
+    var ring_bPos   = XYZ(82f, 145.5f, 13f)
+    var little_bPos = XYZ(107f, 145.5f, 13f)
 
     //phalanx sizes
-    var pha_baseSize = 15f
-    var pha_midSize  = 10f
+    var pha_baseSize = 39.5f
+    var pha_midSize  = 32.5f
 
     //palm
     private lateinit var palm : PlakObject
@@ -109,12 +105,15 @@ class Hand(givenName:String) {
 
 
 
-        //APPLY POSITION & SCALE
+        //APPLY POSITION, ROTATION & SCALE
 
         //set position
         position.x = px
         position.y = py
         position.z = pz
+
+        //finger rotation
+        val finger_rx = (rx - Math.PI/2f).toFloat()
 
         //gather scales into a XYZ
         val scales = XYZ(sx, sy, sz)
@@ -148,14 +147,14 @@ class Hand(givenName:String) {
             name+"_thumb_base",
             thumb_base,
             px=px+thumb_bPos.x, py=py+thumb_bPos.y, pz=pz+thumb_bPos.z,
-            rx=rx, ry=ry, rz=rz,
+            rx=finger_rx, ry=ry, rz=rz,
             sx=sx, sy=sy, sz=sz
         )
         scene.addElement(
             name+"_thumb_end",
             thumb_end,
             px=px+thumb_bPos.x, py=py+thumb_bPos.y+pha_baseSize, pz=pz+thumb_bPos.z,
-            rx=rx, ry=ry, rz=rz,
+            rx=finger_rx, ry=ry, rz=rz,
             sx=sx, sy=sy, sz=sz
         )
 
@@ -164,21 +163,21 @@ class Hand(givenName:String) {
             name+"_index_base",
             index_base,
             px=px+index_bPos.x, py=py+index_bPos.y, pz=pz+index_bPos.z,
-            rx=rx, ry=ry, rz=rz,
+            rx=finger_rx, ry=ry, rz=rz,
             sx=sx, sy=sy, sz=sz
         )
         scene.addElement(
             name+"_index_mid",
             index_mid,
             px=px+index_bPos.x, py=py+index_bPos.y+pha_baseSize, pz=pz+index_bPos.z,
-            rx=rx, ry=ry, rz=rz,
+            rx=finger_rx, ry=ry, rz=rz,
             sx=sx, sy=sy, sz=sz
         )
         scene.addElement(
             name+"_index_end",
             index_end,
             px=px+index_bPos.x, py=py+index_bPos.y+pha_baseSize+pha_midSize, pz=pz+index_bPos.z,
-            rx=rx, ry=ry, rz=rz,
+            rx=finger_rx, ry=ry, rz=rz,
             sx=sx, sy=sy, sz=sz
         )
 
@@ -187,21 +186,21 @@ class Hand(givenName:String) {
             name+"_middle_base",
             middle_base,
             px=px+middle_bPos.x, py=py+middle_bPos.y, pz=pz+middle_bPos.z,
-            rx=rx, ry=ry, rz=rz,
+            rx=finger_rx, ry=ry, rz=rz,
             sx=sx, sy=sy, sz=sz
         )
         scene.addElement(
             name+"_middle_mid",
             middle_mid,
             px=px+middle_bPos.x, py=py+middle_bPos.y+pha_baseSize, pz=pz+middle_bPos.z,
-            rx=rx, ry=ry, rz=rz,
+            rx=finger_rx, ry=ry, rz=rz,
             sx=sx, sy=sy, sz=sz
         )
         scene.addElement(
             name+"_middle_end",
             middle_end,
             px=px+middle_bPos.x, py=py+middle_bPos.y+pha_baseSize+pha_midSize, pz=pz+middle_bPos.z,
-            rx=rx, ry=ry, rz=rz,
+            rx=finger_rx, ry=ry, rz=rz,
             sx=sx, sy=sy, sz=sz
         )
 
@@ -210,21 +209,21 @@ class Hand(givenName:String) {
             name+"_ring_base",
             ring_base,
             px=px+ring_bPos.x, py=py+ring_bPos.y, pz=pz+ring_bPos.z,
-            rx=rx, ry=ry, rz=rz,
+            rx=finger_rx, ry=ry, rz=rz,
             sx=sx, sy=sy, sz=sz
         )
         scene.addElement(
             name+"_ring_mid",
             ring_mid,
             px=px+ring_bPos.x, py=py+ring_bPos.y+pha_baseSize, pz=pz+ring_bPos.z,
-            rx=rx, ry=ry, rz=rz,
+            rx=finger_rx, ry=ry, rz=rz,
             sx=sx, sy=sy, sz=sz
         )
         scene.addElement(
             name+"_ring_end",
             ring_end,
             px=px+ring_bPos.x, py=py+ring_bPos.y+pha_baseSize+pha_midSize, pz=pz+ring_bPos.z,
-            rx=rx, ry=ry, rz=rz,
+            rx=finger_rx, ry=ry, rz=rz,
             sx=sx, sy=sy, sz=sz
         )
 
@@ -233,21 +232,21 @@ class Hand(givenName:String) {
             name+"_little_base",
             little_base,
             px=px+little_bPos.x, py=py+little_bPos.y, pz=pz+little_bPos.z,
-            rx=rx, ry=ry, rz=rz,
+            rx=finger_rx, ry=ry, rz=rz,
             sx=sx, sy=sy, sz=sz
         )
         scene.addElement(
             name+"_little_mid",
             little_mid,
             px=px+little_bPos.x, py=py+little_bPos.y+pha_baseSize, pz=pz+little_bPos.z,
-            rx=rx, ry=ry, rz=rz,
+            rx=finger_rx, ry=ry, rz=rz,
             sx=sx, sy=sy, sz=sz
         )
         scene.addElement(
             name+"_little_end",
             little_end,
             px=px+little_bPos.x, py=py+little_bPos.y+pha_baseSize+pha_midSize, pz=pz+little_bPos.z,
-            rx=rx, ry=ry, rz=rz,
+            rx=finger_rx, ry=ry, rz=rz,
             sx=sx, sy=sy, sz=sz
         )
     }
@@ -432,26 +431,26 @@ class Hand(givenName:String) {
         pha_midSize  *= sy
 
         //reset positions (without touching buffers for now)
-        palm.reset(updateBuffers=false)
+        palm.reset(keepRotation=true, keepScale=true, updateBuffers=false)
 
-        thumb_base.reset(updateBuffers=false)
-        thumb_end.reset(updateBuffers=false)
+        thumb_base.reset(keepRotation=true, keepScale=true, updateBuffers=false)
+        thumb_end.reset(keepRotation=true, keepScale=true, updateBuffers=false)
 
-        index_base.reset(updateBuffers=false)
-        index_mid.reset(updateBuffers=false)
-        index_end.reset(updateBuffers=false)
+        index_base.reset(keepRotation=true, keepScale=true, updateBuffers=false)
+        index_mid.reset(keepRotation=true, keepScale=true, updateBuffers=false)
+        index_end.reset(keepRotation=true, keepScale=true, updateBuffers=false)
 
-        middle_base.reset(updateBuffers=false)
-        middle_mid.reset(updateBuffers=false)
-        middle_end.reset(updateBuffers=false)
+        middle_base.reset(keepRotation=true, keepScale=true, updateBuffers=false)
+        middle_mid.reset(keepRotation=true, keepScale=true, updateBuffers=false)
+        middle_end.reset(keepRotation=true, keepScale=true, updateBuffers=false)
 
-        ring_base.reset(updateBuffers=false)
-        ring_mid.reset(updateBuffers=false)
-        ring_end.reset(updateBuffers=false)
+        ring_base.reset(keepRotation=true, keepScale=true, updateBuffers=false)
+        ring_mid.reset(keepRotation=true, keepScale=true, updateBuffers=false)
+        ring_end.reset(keepRotation=true, keepScale=true, updateBuffers=false)
 
-        little_base.reset(updateBuffers=false)
-        little_mid.reset(updateBuffers=false)
-        little_end.reset(updateBuffers=false)
+        little_base.reset(keepRotation=true, keepScale=true, updateBuffers=false)
+        little_mid.reset(keepRotation=true, keepScale=true, updateBuffers=false)
+        little_end.reset(keepRotation=true, keepScale=true, updateBuffers=false)
 
         //place them back using updated values (updating buffers by the way)
         var bPos : XYZ
