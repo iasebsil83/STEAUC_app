@@ -39,15 +39,16 @@ class MenuActivity : AppCompatActivity() {
         // BUTTONS
 
         //bind menu start
-        /* TEMPORARILY DISABLED FOR 3D TESTING
+
         binding.menuStartButton.setOnClickListener{
             val intent = Intent(this, BLEScanActivity::class.java)
             startActivity(intent)
-        }*/
+        }
+        /* TEMPORARILY DISABLED FOR DATA PROCESSING DEV
         binding.menuStartButton.setOnClickListener{
             val intent = Intent(this, SceneActivity::class.java)
             startActivity(intent)
-        }
+        } */
 
         //bind menu settings
         binding.menuSettingsButton.setOnClickListener{

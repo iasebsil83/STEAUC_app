@@ -4,9 +4,6 @@ import android.annotation.SuppressLint
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
-import android.content.Context
-import android.os.Handler
-import android.os.Looper
 import android.view.*
 import android.widget.Button
 import android.widget.EditText
@@ -21,8 +18,7 @@ import fr.stark.steauc.log.CodeInfo
 import fr.stark.steauc.log.Error
 import fr.stark.steauc.log.Message
 import fr.stark.steauc.SceneActivity
-import fr.stark.steauc.gl.XYZ
-
+import fr.stark.steauc.kalman.DataSet
 
 
 class BLEServiceAdapter(
@@ -227,7 +223,7 @@ class BLEServiceAdapter(
 
     //read
     private fun readData(
-        holder         : BLEServiceAdapter.CharacteristicViewHolder,
+        holder         : CharacteristicViewHolder,
         characteristic : BluetoothGattCharacteristic
     ){
         msg.function("readData")
@@ -253,36 +249,37 @@ class BLEServiceAdapter(
             }
 
             //correct value
-            val lowestNegativeOn16b = 0x4000 //shall normally be 0x8000 (32768)
-            when(receivedData[0]){
+            val lowestNegativeOn16b = 0x4000 //shall normally be 0x8000 (32768)$
 
+            //Add a set in Kalman
+            //If no element, first use => we init the new set with the current time to have a 0ms elapsed time
+            var lastIndex = scene.kalmanFilter.dataSetList.size - 1
+            if(lastIndex == -1){
+                scene.kalmanFilter.dataSetList.add(DataSet(System.currentTimeMillis()))
+            }
+            //else, we pass the previous element current time to create an elapsed time
+            else{
+                scene.kalmanFilter.dataSetList.add(DataSet(scene.kalmanFilter.dataSetList[lastIndex].currentTime))
+            }
+            lastIndex++
+
+            //Change state
+            scene.kalmanFilter.newDataSet = true
+
+            when(receivedData[0]){
                 //accelerometer
                 'A' -> {
                     //msg.log("Received raw A : \"$receivedData\".")
 
-                    //check sign of the received value
                     var uint16_value = fourHexToUInt16(receivedData[2], receivedData[3], receivedData[4], receivedData[5])
-                    if(uint16_value >= lowestNegativeOn16b){
-                        scene.receivedAccX += uint16ToInt16(uint16_value).toDouble()
-                    }else{
-                        scene.receivedAccX += uint16_value.toDouble()
-                    }
+                    scene.kalmanFilter.dataSetList[lastIndex].points.add(uint16ToInt16(uint16_value).toDouble())
 
-                    //check sign of the received value
                     uint16_value = fourHexToUInt16(receivedData[7], receivedData[8], receivedData[9], receivedData[10])
-                    if(uint16_value >= lowestNegativeOn16b){
-                        scene.receivedAccY += uint16ToInt16(uint16_value).toDouble()
-                    }else{
-                        scene.receivedAccY += uint16_value.toDouble()
-                    }
+                    scene.kalmanFilter.dataSetList[lastIndex].points.add(uint16ToInt16(uint16_value).toDouble())
 
-                    //check sign of the received value
                     uint16_value = fourHexToUInt16(receivedData[12], receivedData[13], receivedData[14], receivedData[15])
-                    if(uint16_value >= lowestNegativeOn16b){
-                        scene.receivedAccZ += uint16ToInt16(uint16_value).toDouble()
-                    }else{
-                        scene.receivedAccZ += uint16_value.toDouble()
-                    }
+                    scene.kalmanFilter.dataSetList[lastIndex].points.add(uint16ToInt16(uint16_value).toDouble())
+
                     //msg.log("Formatted A : (${scene.receivedAccX},${scene.receivedAccY},${scene.receivedAccZ}).")
                 }
 
@@ -290,32 +287,17 @@ class BLEServiceAdapter(
                 'G' -> {
                     //msg.log("Received raw G : \"$receivedData\".")
 
-                    //check sign of the received value
                     var uint16_value = fourHexToUInt16(receivedData[2], receivedData[3], receivedData[4], receivedData[5])
-                    if(uint16_value >= lowestNegativeOn16b){
-                        scene.receivedGyrX += uint16ToInt16(uint16_value).toDouble()
-                        val str = Integer.toBinaryString( uint16ToInt16(uint16_value) )
-                        msg.log("Int16 Message \"$receivedData\" => -X : $str.")
-                    }else{
-                        scene.receivedGyrX += uint16_value.toDouble()
-                        msg.log("Int16 Message \"$receivedData\" => +X : ${uint16_value}.")
-                    }
+                    scene.kalmanFilter.dataSetList[lastIndex].points.add(
+                        uint16ToInt16(uint16_value).toDouble()
+                    )
+                    //By I.A.
 
-                    //check sign of the received value
                     uint16_value = fourHexToUInt16(receivedData[7], receivedData[8], receivedData[9], receivedData[10])
-                    if(uint16_value >= lowestNegativeOn16b){
-                        scene.receivedGyrY += uint16ToInt16(uint16_value).toDouble()
-                    }else{
-                        scene.receivedGyrY += uint16_value.toDouble()
-                    }
+                    scene.kalmanFilter.dataSetList[lastIndex].points.add(uint16ToInt16(uint16_value).toDouble())
 
-                    //check sign of the received value
                     uint16_value = fourHexToUInt16(receivedData[12], receivedData[13], receivedData[14], receivedData[15])
-                    if(uint16_value >= lowestNegativeOn16b){
-                        scene.receivedGyrZ += uint16ToInt16(uint16_value).toDouble()
-                    }else{
-                        scene.receivedGyrZ += uint16_value.toDouble()
-                    }
+                    scene.kalmanFilter.dataSetList[lastIndex].points.add(uint16ToInt16(uint16_value).toDouble())
 
                     //msg.log("Formatted G : (${scene.receivedGyrX},${scene.receivedGyrY},${scene.receivedGyrZ}).")
                 }
