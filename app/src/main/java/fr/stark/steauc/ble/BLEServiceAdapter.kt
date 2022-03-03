@@ -20,6 +20,7 @@ import fr.stark.steauc.log.Message
 import fr.stark.steauc.SceneActivity
 import fr.stark.steauc.kalman.DataSet
 
+const val NOTIFY_DELAY : Long = 0
 
 class BLEServiceAdapter(
     private val gatt         : BluetoothGatt?,
@@ -213,9 +214,8 @@ class BLEServiceAdapter(
         this.readData(holder, characteristic)
 
         //temporizing (for click event)
-        Thread.sleep(100)
+        //Thread.sleep(NOTIFY_DELAY)
     }
-
 
 
 
@@ -241,10 +241,10 @@ class BLEServiceAdapter(
         }
 
         //set received data
-        if(receivedData.length == 17) {
+        if(receivedData.length == 34) {
 
             //error code
-            if(receivedData[2] == '2' && receivedData[3] == '3' && receivedData[4] == '2' && receivedData[5] == '8') {
+            if(receivedData[3] == '2' && receivedData[4] == '3' && receivedData[5] == '2' && receivedData[6] == '8') {
                 return
             }
 
@@ -263,48 +263,28 @@ class BLEServiceAdapter(
             }
             lastIndex++
 
-            //Change state
+            //ACC
+            var uint16_value = fourHexToUInt16(receivedData[3], receivedData[4], receivedData[5], receivedData[6])
+            scene.kalmanFilter.dataSetList[lastIndex].points.add(uint16ToInt16(uint16_value).toDouble())
+
+            uint16_value = fourHexToUInt16(receivedData[8], receivedData[9], receivedData[10], receivedData[11])
+            scene.kalmanFilter.dataSetList[lastIndex].points.add(uint16ToInt16(uint16_value).toDouble())
+
+            uint16_value = fourHexToUInt16(receivedData[13], receivedData[14], receivedData[15], receivedData[16])
+            scene.kalmanFilter.dataSetList[lastIndex].points.add(uint16ToInt16(uint16_value).toDouble())
+
+            //GYR
+            uint16_value = fourHexToUInt16(receivedData[19], receivedData[20], receivedData[21], receivedData[22])
+            scene.kalmanFilter.dataSetList[lastIndex].points.add(uint16ToInt16(uint16_value).toDouble())
+
+            uint16_value = fourHexToUInt16(receivedData[24], receivedData[25], receivedData[26], receivedData[27])
+            scene.kalmanFilter.dataSetList[lastIndex].points.add(uint16ToInt16(uint16_value).toDouble())
+
+            uint16_value = fourHexToUInt16(receivedData[29], receivedData[30], receivedData[31], receivedData[32])
+            scene.kalmanFilter.dataSetList[lastIndex].points.add(uint16ToInt16(uint16_value).toDouble())
+
+            //Set new Kalman Filter condition
             scene.kalmanFilter.newDataSet = true
-
-            when(receivedData[0]){
-                //accelerometer
-                'A' -> {
-                    //msg.log("Received raw A : \"$receivedData\".")
-
-                    var uint16_value = fourHexToUInt16(receivedData[2], receivedData[3], receivedData[4], receivedData[5])
-                    scene.kalmanFilter.dataSetList[lastIndex].points.add(uint16ToInt16(uint16_value).toDouble())
-
-                    uint16_value = fourHexToUInt16(receivedData[7], receivedData[8], receivedData[9], receivedData[10])
-                    scene.kalmanFilter.dataSetList[lastIndex].points.add(uint16ToInt16(uint16_value).toDouble())
-
-                    uint16_value = fourHexToUInt16(receivedData[12], receivedData[13], receivedData[14], receivedData[15])
-                    scene.kalmanFilter.dataSetList[lastIndex].points.add(uint16ToInt16(uint16_value).toDouble())
-
-                    //msg.log("Formatted A : (${scene.receivedAccX},${scene.receivedAccY},${scene.receivedAccZ}).")
-                }
-
-                //gyroscope
-                'G' -> {
-                    //msg.log("Received raw G : \"$receivedData\".")
-
-                    var uint16_value = fourHexToUInt16(receivedData[2], receivedData[3], receivedData[4], receivedData[5])
-                    scene.kalmanFilter.dataSetList[lastIndex].points.add(
-                        uint16ToInt16(uint16_value).toDouble()
-                    )
-                    //By I.A.
-
-                    uint16_value = fourHexToUInt16(receivedData[7], receivedData[8], receivedData[9], receivedData[10])
-                    scene.kalmanFilter.dataSetList[lastIndex].points.add(uint16ToInt16(uint16_value).toDouble())
-
-                    uint16_value = fourHexToUInt16(receivedData[12], receivedData[13], receivedData[14], receivedData[15])
-                    scene.kalmanFilter.dataSetList[lastIndex].points.add(uint16ToInt16(uint16_value).toDouble())
-
-                    //msg.log("Formatted G : (${scene.receivedGyrX},${scene.receivedGyrY},${scene.receivedGyrZ}).")
-                }
-
-                //incorrect value
-                else -> msg.log("Incorrect data received.")
-            }
         }
     }
 
