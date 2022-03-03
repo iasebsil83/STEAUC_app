@@ -3,6 +3,9 @@ package fr.stark.steauc
 import android.bluetooth.*
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.GestureDetector
+import android.view.MotionEvent
+import android.view.MotionEvent.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import fr.stark.steauc.ble.BLEService
 import fr.stark.steauc.ble.BLEServiceAdapter
@@ -11,6 +14,7 @@ import fr.stark.steauc.log.CodeInfo
 import fr.stark.steauc.log.Error
 import fr.stark.steauc.log.Message
 import fr.stark.steauc.gl.*
+import java.lang.Math.abs
 
 
 //scene refresh
@@ -30,7 +34,7 @@ const val SCALE_STEP  = 1.05f
 
 
 
-class SceneActivity : AppCompatActivity() {
+class SceneActivity : AppCompatActivity(), GestureDetector.OnGestureListener {
 
     //debug info
     private val info : CodeInfo = CodeInfo("Main", "SceneActivity.kt")
@@ -58,6 +62,12 @@ class SceneActivity : AppCompatActivity() {
     //hand
     private lateinit var steauc : Hand
 
+    //tactil
+    lateinit var gestureDetector: GestureDetector
+    var oldX:Float = 0.0f
+    var newX:Float = 0.0f
+    var oldY:Float = 0.0f
+    var newY:Float = 0.0f
 
 
 
@@ -112,14 +122,49 @@ class SceneActivity : AppCompatActivity() {
 
         //bind buttons
         bindButtonEvents()
+
+
+        // Tactil
+        gestureDetector = GestureDetector(this, this)
     }
 
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        gestureDetector.onTouchEvent(event)
 
+        when(event?.action){
 
+            // When we start to swipe
+            ACTION_DOWN->{
+                oldX = event.x
+                oldY = event.y
+                newX = event.x
+                newY = event.y
+            }
 
+            // When we end the swipe
+            ACTION_MOVE->{
+                oldX = newX
+                oldY = newY
+                newX = event.x
+                newY = event.y
 
+                val speed = 0.2f
+                var horizonSwipe = 0.0f
+                var verticalSwipe = 0.0f
+                if(abs(oldX-newX) > 20){
+                    horizonSwipe = if ((oldX-newX) > 0.0f) speed else -speed
+                }
+                if(abs(oldY-newY) > 20){
+                    verticalSwipe = if (-(oldY-newY) > 0.0f) -speed else speed
+                }
+                steauc.rotate(verticalSwipe, horizonSwipe, 0.0f)
+            }
+        }
 
-    //GRAPHICAL SCENE
+        return super.onTouchEvent(event)
+    }
+
+//GRAPHICAL SCENE
 
     //init
     fun initScene() : Long {
@@ -275,5 +320,37 @@ class SceneActivity : AppCompatActivity() {
                 binding.bleServicesRecView.layoutManager = LinearLayoutManager(this@SceneActivity)
             }
         }
+    }
+
+    override fun onDown(e: MotionEvent?): Boolean {
+        return false
+    }
+
+    override fun onShowPress(e: MotionEvent?) {
+    }
+
+    override fun onSingleTapUp(e: MotionEvent?): Boolean {
+        return false
+    }
+
+    override fun onScroll(
+        e1: MotionEvent?,
+        e2: MotionEvent?,
+        distanceX: Float,
+        distanceY: Float
+    ): Boolean {
+        return false
+    }
+
+    override fun onLongPress(e: MotionEvent?) {
+    }
+
+    override fun onFling(
+        e1: MotionEvent?,
+        e2: MotionEvent?,
+        velocityX: Float,
+        velocityY: Float
+    ): Boolean {
+        return false
     }
 }
