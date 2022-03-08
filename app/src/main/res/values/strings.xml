@@ -33,9 +33,10 @@
     <string name="ble_interact_button_title">Interact</string>
 
     <!-- Scene buttons -->
-    <string name="scene_button_left">Left</string>
-    <string name="scene_button_right">Right</string>
-    <string name="scene_button_up">Up</string>
-    <string name="scene_button_down">Down</string>
+    <string name="scene_button_thumb">T</string>
+    <string name="scene_button_index">I</string>
+    <string name="scene_button_middle">M</string>
+    <string name="scene_button_ring">R</string>
+    <string name="scene_button_little">L</string>
 
 </resources>

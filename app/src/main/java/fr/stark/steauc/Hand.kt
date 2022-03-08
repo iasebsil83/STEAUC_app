@@ -7,6 +7,23 @@ import fr.stark.steauc.log.Error
 import fr.stark.steauc.log.Message
 
 
+
+//global shift
+private const val GLOBAL_SHIFTX = 0.7f
+
+//fingers
+const val FINGER_THUMB  = 0
+const val FINGER_INDEX  = 1
+const val FINGER_MIDDLE = 2
+const val FINGER_RING   = 3
+const val FINGER_LITTLE = 4
+
+//postures
+const val POSTURE_NORMAL = 0
+const val POSTURE_CLOSED = 1
+
+
+
 class Hand(givenName:String) {
 
     //debug info
@@ -21,6 +38,9 @@ class Hand(givenName:String) {
     private var position = XYZ()
     private var rotation = XYZ()
     private var scale    = XYZ(1f, 1f, 1f)
+
+    // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    private var init_pos = XYZ()
 
     //finger base positions (from palm)
     var thumb_bPos  = XYZ(-10f, 45f, 13f)
@@ -77,38 +97,39 @@ class Hand(givenName:String) {
         //LOAD STRUCTURES
 
         //palm
-        palm        = PlakObject( Utils.readSTL(ctx, "palm.stl"), BLUE)
+        palm        = PlakObject( Utils.readSTL(ctx, "palm.stl"), MAGENTA)
 
         //thumb
         thumb_base  = PlakObject( Utils.readSTL(ctx, "finger_base.stl"), MAGENTA)
-        thumb_end   = PlakObject( Utils.readSTL(ctx, "finger_end.stl"), YELLOW)
+        thumb_end   = PlakObject( Utils.readSTL(ctx, "finger_end.stl"), MAGENTA)
 
         //index finger
         index_base  = PlakObject( Utils.readSTL(ctx, "finger_base.stl"), MAGENTA)
-        index_mid   = PlakObject( Utils.readSTL(ctx, "finger_mid.stl"), RED)
-        index_end   = PlakObject( Utils.readSTL(ctx, "finger_end.stl"), YELLOW)
+        index_mid   = PlakObject( Utils.readSTL(ctx, "finger_mid.stl"), MAGENTA)
+        index_end   = PlakObject( Utils.readSTL(ctx, "finger_mid.stl"), MAGENTA) //end.stl"), MAGENTA)
 
         //middle finger
         middle_base = PlakObject( Utils.readSTL(ctx, "finger_base.stl"), MAGENTA)
-        middle_mid  = PlakObject( Utils.readSTL(ctx, "finger_mid.stl"), RED)
-        middle_end  = PlakObject( Utils.readSTL(ctx, "finger_end.stl"), YELLOW)
+        middle_mid  = PlakObject( Utils.readSTL(ctx, "finger_mid.stl"), MAGENTA)
+        middle_end  = PlakObject( Utils.readSTL(ctx, "finger_mid.stl"), MAGENTA) //end.stl"), MAGENTA)
 
         //ring finger
         ring_base   = PlakObject( Utils.readSTL(ctx, "finger_base.stl"), MAGENTA)
-        ring_mid    = PlakObject( Utils.readSTL(ctx, "finger_mid.stl"), RED)
-        ring_end    = PlakObject( Utils.readSTL(ctx, "finger_end.stl"), YELLOW)
+        ring_mid    = PlakObject( Utils.readSTL(ctx, "finger_mid.stl"), MAGENTA)
+        ring_end    = PlakObject( Utils.readSTL(ctx, "finger_mid.stl"), MAGENTA) //end.stl"), MAGENTA)
 
         //little finger
         little_base = PlakObject( Utils.readSTL(ctx, "finger_base.stl"), MAGENTA)
-        little_mid  = PlakObject( Utils.readSTL(ctx, "finger_mid.stl"), RED)
-        little_end  = PlakObject( Utils.readSTL(ctx, "finger_end.stl"), YELLOW)
+        little_mid  = PlakObject( Utils.readSTL(ctx, "finger_mid.stl"), MAGENTA)
+        little_end  = PlakObject( Utils.readSTL(ctx, "finger_mid.stl"), MAGENTA) //end.stl"), MAGENTA)
 
 
 
         //APPLY POSITION, ROTATION & SCALE
 
         //set position
-        position.x = px
+        init_pos = XYZ(px+GLOBAL_SHIFTX, py, pz)
+        position.x = px + GLOBAL_SHIFTX
         position.y = py
         position.z = pz
 
@@ -291,132 +312,164 @@ class Hand(givenName:String) {
     // GENERAL MOVEMENTS
 
     //translations
-    fun translate(dx:Float, dy:Float, dz:Float) {
-        palm.translate(dx, dy, dz)
+    fun translate(
+        dx:Float, dy:Float, dz:Float,
+        updateBuffers:Boolean=true, trace:Boolean=true
+    ) {
+        palm.translate(dx, dy, dz, updateBuffers=updateBuffers, trace=trace)
 
-        thumb_base.translate(dx, dy, dz)
-        thumb_end.translate(dx, dy, dz)
+        thumb_base.translate(dx, dy, dz, updateBuffers=updateBuffers, trace=trace)
+        thumb_end.translate(dx, dy, dz, updateBuffers=updateBuffers, trace=trace)
 
-        index_base.translate(dx, dy, dz)
-        index_mid.translate(dx, dy, dz)
-        index_end.translate(dx, dy, dz)
+        index_base.translate(dx, dy, dz, updateBuffers=updateBuffers, trace=trace)
+        index_mid.translate(dx, dy, dz, updateBuffers=updateBuffers, trace=trace)
+        index_end.translate(dx, dy, dz, updateBuffers=updateBuffers, trace=trace)
 
-        middle_base.translate(dx, dy, dz)
-        middle_mid.translate(dx, dy, dz)
-        middle_end.translate(dx, dy, dz)
+        middle_base.translate(dx, dy, dz, updateBuffers=updateBuffers, trace=trace)
+        middle_mid.translate(dx, dy, dz, updateBuffers=updateBuffers, trace=trace)
+        middle_end.translate(dx, dy, dz, updateBuffers=updateBuffers, trace=trace)
 
-        ring_base.translate(dx, dy, dz)
-        ring_mid.translate(dx, dy, dz)
-        ring_end.translate(dx, dy, dz)
+        ring_base.translate(dx, dy, dz, updateBuffers=updateBuffers, trace=trace)
+        ring_mid.translate(dx, dy, dz, updateBuffers=updateBuffers, trace=trace)
+        ring_end.translate(dx, dy, dz, updateBuffers=updateBuffers, trace=trace)
 
-        little_base.translate(dx, dy, dz)
-        little_mid.translate(dx, dy, dz)
-        little_end.translate(dx, dy, dz)
+        little_base.translate(dx, dy, dz, updateBuffers=updateBuffers, trace=trace)
+        little_mid.translate(dx, dy, dz, updateBuffers=updateBuffers, trace=trace)
+        little_end.translate(dx, dy, dz, updateBuffers=updateBuffers, trace=trace)
 
         //update position trace as well
-        position.x += dx
-        position.y += dy
-        position.z += dz
+        if(trace){
+            position.x += dx
+            position.y += dy
+            position.z += dz
+        }
     }
 
-    fun translate(p:XYZ)     = translate(p.x, p.y, p.z)
-    fun translateX(dx:Float) = translate(dx, 0f, 0f)
-    fun translateY(dy:Float) = translate(0f, dy, 0f)
-    fun translateZ(dz:Float) = translate(0f, 0f, dz)
+    fun translate(p:XYZ, updateBuffers:Boolean=true, trace:Boolean=true)     = translate(
+        p.x, p.y, p.z,
+        updateBuffers=updateBuffers, trace=trace
+    )
+    fun translateX(dx:Float, updateBuffers:Boolean=true, trace:Boolean=true) = translate(
+        dx, 0f, 0f,
+        updateBuffers=updateBuffers, trace=trace
+    )
+    fun translateY(dy:Float, updateBuffers:Boolean=true, trace:Boolean=true) = translate(
+        0f, dy, 0f,
+        updateBuffers=updateBuffers, trace=trace
+    )
+    fun translateZ(dz:Float, updateBuffers:Boolean=true, trace:Boolean=true) = translate(
+        0f, 0f, dz,
+        updateBuffers=updateBuffers, trace=trace
+    )
 
 
 
     //rotations
-    fun rotate(angleX:Float, angleY:Float, angleZ:Float) {
-        rotateX(angleX)
-        rotateY(angleY)
-        rotateZ(angleZ)
+    fun rotate(
+        angleX:Float, angleY:Float, angleZ:Float,
+        updateBuffers:Boolean=true, trace:Boolean=true
+    ) {
+        rotateX(angleX, updateBuffers=updateBuffers, trace=trace)
+        rotateY(angleY, updateBuffers=updateBuffers, trace=trace)
+        rotateZ(angleZ, updateBuffers=updateBuffers, trace=trace)
     }
 
-    fun rotateX(angleX:Float) {
-        palm.rotateX(position, angleX)
+    fun rotateX(angleX:Float, updateBuffers:Boolean=true, trace:Boolean=true) {
+        palm.rotateX(position, angleX, updateBuffers=updateBuffers, trace=trace)
 
-        thumb_base.rotateX(position, angleX)
-        thumb_end.rotateX(position, angleX)
+        thumb_base.rotateX(position, angleX, updateBuffers=updateBuffers, trace=trace)
+        thumb_end.rotateX(position, angleX, updateBuffers=updateBuffers, trace=trace)
 
-        index_base.rotateX(position, angleX)
-        index_mid.rotateX(position, angleX)
-        index_end.rotateX(position, angleX)
+        index_base.rotateX(position, angleX, updateBuffers=updateBuffers, trace=trace)
+        index_mid.rotateX(position, angleX, updateBuffers=updateBuffers, trace=trace)
+        index_end.rotateX(position, angleX, updateBuffers=updateBuffers, trace=trace)
 
-        middle_base.rotateX(position, angleX)
-        middle_mid.rotateX(position, angleX)
-        middle_end.rotateX(position, angleX)
+        middle_base.rotateX(position, angleX, updateBuffers=updateBuffers, trace=trace)
+        middle_mid.rotateX(position, angleX, updateBuffers=updateBuffers, trace=trace)
+        middle_end.rotateX(position, angleX, updateBuffers=updateBuffers, trace=trace)
 
-        ring_base.rotateX(position, angleX)
-        ring_mid.rotateX(position, angleX)
-        ring_end.rotateX(position, angleX)
+        ring_base.rotateX(position, angleX, updateBuffers=updateBuffers, trace=trace)
+        ring_mid.rotateX(position, angleX, updateBuffers=updateBuffers, trace=trace)
+        ring_end.rotateX(position, angleX, updateBuffers=updateBuffers, trace=trace)
 
-        little_base.rotateX(position, angleX)
-        little_mid.rotateX(position, angleX)
-        little_end.rotateX(position, angleX)
+        little_base.rotateX(position, angleX, updateBuffers=updateBuffers, trace=trace)
+        little_mid.rotateX(position, angleX, updateBuffers=updateBuffers, trace=trace)
+        little_end.rotateX(position, angleX, updateBuffers=updateBuffers, trace=trace)
 
         //update rotation trace as well
-        rotation.x += angleX
+        if(trace){
+            rotation.x += angleX
+        }
     }
 
-    fun rotateY(angleY:Float) {
-        palm.rotateY(position, angleY)
+    fun rotateY(angleY:Float, updateBuffers:Boolean=true, trace:Boolean=true) {
+        palm.rotateY(position, angleY, updateBuffers=updateBuffers, trace=trace)
 
-        thumb_base.rotateY(position, angleY)
-        thumb_end.rotateY(position, angleY)
+        thumb_base.rotateY(position, angleY, updateBuffers=updateBuffers, trace=trace)
+        thumb_end.rotateY(position, angleY, updateBuffers=updateBuffers, trace=trace)
 
-        index_base.rotateY(position, angleY)
-        index_mid.rotateY(position, angleY)
-        index_end.rotateY(position, angleY)
+        index_base.rotateY(position, angleY, updateBuffers=updateBuffers, trace=trace)
+        index_mid.rotateY(position, angleY, updateBuffers=updateBuffers, trace=trace)
+        index_end.rotateY(position, angleY, updateBuffers=updateBuffers, trace=trace)
 
-        middle_base.rotateY(position, angleY)
-        middle_mid.rotateY(position, angleY)
-        middle_end.rotateY(position, angleY)
+        middle_base.rotateY(position, angleY, updateBuffers=updateBuffers, trace=trace)
+        middle_mid.rotateY(position, angleY, updateBuffers=updateBuffers, trace=trace)
+        middle_end.rotateY(position, angleY, updateBuffers=updateBuffers, trace=trace)
 
-        ring_base.rotateY(position, angleY)
-        ring_mid.rotateY(position, angleY)
-        ring_end.rotateY(position, angleY)
+        ring_base.rotateY(position, angleY, updateBuffers=updateBuffers, trace=trace)
+        ring_mid.rotateY(position, angleY, updateBuffers=updateBuffers, trace=trace)
+        ring_end.rotateY(position, angleY, updateBuffers=updateBuffers, trace=trace)
 
-        little_base.rotateY(position, angleY)
-        little_mid.rotateY(position, angleY)
-        little_end.rotateY(position, angleY)
+        little_base.rotateY(position, angleY, updateBuffers=updateBuffers, trace=trace)
+        little_mid.rotateY(position, angleY, updateBuffers=updateBuffers, trace=trace)
+        little_end.rotateY(position, angleY, updateBuffers=updateBuffers, trace=trace)
 
         //update rotation trace as well
-        rotation.y += angleY
+        if(trace){
+            rotation.y += angleY
+        }
     }
 
-    fun rotateZ(angleZ:Float) {
-        palm.rotateZ(position, angleZ)
+    fun rotateZ(angleZ:Float, updateBuffers:Boolean=true, trace:Boolean=true) {
+        palm.rotateZ(position, angleZ, updateBuffers=updateBuffers, trace=trace)
 
-        thumb_base.rotateZ(position, angleZ)
-        thumb_end.rotateZ(position, angleZ)
+        thumb_base.rotateZ(position, angleZ, updateBuffers=updateBuffers, trace=trace)
+        thumb_end.rotateZ(position, angleZ, updateBuffers=updateBuffers, trace=trace)
 
-        index_base.rotateZ(position, angleZ)
-        index_mid.rotateZ(position, angleZ)
-        index_end.rotateZ(position, angleZ)
+        index_base.rotateZ(position, angleZ, updateBuffers=updateBuffers, trace=trace)
+        index_mid.rotateZ(position, angleZ, updateBuffers=updateBuffers, trace=trace)
+        index_end.rotateZ(position, angleZ, updateBuffers=updateBuffers, trace=trace)
 
-        middle_base.rotateZ(position, angleZ)
-        middle_mid.rotateZ(position, angleZ)
-        middle_end.rotateZ(position, angleZ)
+        middle_base.rotateZ(position, angleZ, updateBuffers=updateBuffers, trace=trace)
+        middle_mid.rotateZ(position, angleZ, updateBuffers=updateBuffers, trace=trace)
+        middle_end.rotateZ(position, angleZ, updateBuffers=updateBuffers, trace=trace)
 
-        ring_base.rotateZ(position, angleZ)
-        ring_mid.rotateZ(position, angleZ)
-        ring_end.rotateZ(position, angleZ)
+        ring_base.rotateZ(position, angleZ, updateBuffers=updateBuffers, trace=trace)
+        ring_mid.rotateZ(position, angleZ, updateBuffers=updateBuffers, trace=trace)
+        ring_end.rotateZ(position, angleZ, updateBuffers=updateBuffers, trace=trace)
 
-        little_base.rotateZ(position, angleZ)
-        little_mid.rotateZ(position, angleZ)
-        little_end.rotateZ(position, angleZ)
+        little_base.rotateZ(position, angleZ, updateBuffers=updateBuffers, trace=trace)
+        little_mid.rotateZ(position, angleZ, updateBuffers=updateBuffers, trace=trace)
+        little_end.rotateZ(position, angleZ, updateBuffers=updateBuffers, trace=trace)
 
         //update rotation trace as well
-        rotation.z += angleZ
+        if(trace){
+            rotation.z += angleZ
+        }
     }
 
-    fun rotate(p:XYZ) = rotate(p.x, p.y, p.z)
+    fun rotate(p:XYZ, updateBuffers:Boolean=true, trace:Boolean=true) = rotate(
+        p.x, p.y, p.z,
+        updateBuffers=updateBuffers, trace=trace
+    )
 
 
 
     //scale
-    fun scale(sx:Float, sy:Float, sz:Float) {
+    fun scale(
+        sx:Float, sy:Float, sz:Float,
+        updateBuffers:Boolean=true, trace:Boolean=true
+    ) {
         val scales = XYZ(sx, sy, sz)
 
         //finger base positions scaling
@@ -456,49 +509,211 @@ class Hand(givenName:String) {
         var bPos : XYZ
         var mPos : XYZ
         var ePos : XYZ
-        palm.translate(position)
+        palm.translate(position, updateBuffers=updateBuffers, trace=trace)
 
         bPos = position + thumb_bPos
         mPos = bPos     + XYZ(0f, pha_baseSize, 0f)
-        thumb_base.translate(bPos)
-        thumb_end.translate(mPos)
+        thumb_base.translate(bPos, updateBuffers=updateBuffers, trace=trace)
+        thumb_end.translate(mPos, updateBuffers=updateBuffers, trace=trace)
 
         bPos = position + index_bPos
         mPos = bPos     + XYZ(0f, pha_baseSize, 0f)
         ePos = mPos     + XYZ(0f, pha_midSize, 0f)
-        index_base.translate(bPos)
-        index_mid.translate(mPos)
-        index_end.translate(ePos)
+        index_base.translate(bPos, updateBuffers=updateBuffers, trace=trace)
+        index_mid.translate(mPos, updateBuffers=updateBuffers, trace=trace)
+        index_end.translate(ePos, updateBuffers=updateBuffers, trace=trace)
 
         bPos = position + middle_bPos
         mPos = bPos     + XYZ(0f, pha_baseSize, 0f)
         ePos = mPos     + XYZ(0f, pha_midSize, 0f)
-        middle_base.translate(bPos)
-        middle_mid.translate(mPos)
-        middle_end.translate(ePos)
+        middle_base.translate(bPos, updateBuffers=updateBuffers, trace=trace)
+        middle_mid.translate(mPos, updateBuffers=updateBuffers, trace=trace)
+        middle_end.translate(ePos, updateBuffers=updateBuffers, trace=trace)
 
         bPos = position + ring_bPos
         mPos = bPos     + XYZ(0f, pha_baseSize, 0f)
         ePos = mPos     + XYZ(0f, pha_midSize, 0f)
-        ring_base.translate(bPos)
-        ring_mid.translate(mPos)
-        ring_end.translate(ePos)
+        ring_base.translate(bPos, updateBuffers=updateBuffers, trace=trace)
+        ring_mid.translate(mPos, updateBuffers=updateBuffers, trace=trace)
+        ring_end.translate(ePos, updateBuffers=updateBuffers, trace=trace)
 
         bPos = position + little_bPos
         mPos = bPos     + XYZ(0f, pha_baseSize, 0f)
         ePos = mPos     + XYZ(0f, pha_midSize, 0f)
-        little_base.translate(bPos)
-        little_mid.translate(mPos)
-        little_end.translate(ePos)
+        little_base.translate(bPos, updateBuffers=updateBuffers, trace=trace)
+        little_mid.translate(mPos, updateBuffers=updateBuffers, trace=trace)
+        little_end.translate(ePos, updateBuffers=updateBuffers, trace=trace)
 
         //update scale trace as well
-        scale.x *= sx
-        scale.y *= sy
-        scale.z *= sz
+        if(trace){
+            scale.x *= sx
+            scale.y *= sy
+            scale.z *= sz
+        }
     }
 
-    fun scale(p:XYZ)         = scale(p.x, p.y, p.z)
-    fun scaleX(scaleX:Float) = scale(scaleX, 1f, 1f)
-    fun scaleY(scaleY:Float) = scale(1f, scaleY, 1f)
-    fun scaleZ(scaleZ:Float) = scale(1f, 1f, scaleZ)
+    fun scale(p:XYZ, updateBuffers:Boolean=true, trace:Boolean=true)         = scale(
+        p.x, p.y, p.z,
+        updateBuffers=updateBuffers, trace=trace
+    )
+    fun scaleX(scaleX:Float, updateBuffers:Boolean=true, trace:Boolean=true) = scale(
+        scaleX, 1f, 1f,
+        updateBuffers=updateBuffers, trace=trace
+    )
+    fun scaleY(scaleY:Float, updateBuffers:Boolean=true, trace:Boolean=true) = scale(
+        1f, scaleY, 1f,
+        updateBuffers=updateBuffers, trace=trace
+    )
+    fun scaleZ(scaleZ:Float, updateBuffers:Boolean=true, trace:Boolean=true) = scale(
+        1f, 1f, scaleZ,
+        updateBuffers=updateBuffers, trace=trace
+    )
+
+
+
+
+
+
+    //RESET
+
+    //trace
+    fun resetTrace() {
+        position = XYZ(init_pos.x, init_pos.y, init_pos.z)
+        rotation = XYZ()
+        scale    = XYZ(1f, 1f, 1f)
+    }
+
+
+
+
+
+
+    //POSTURES
+
+    //finger classical postures
+    fun setFingerPosture(finger:Int, posture:Int) {
+        when(posture){
+            POSTURE_NORMAL -> {
+                when(finger){
+                    FINGER_THUMB -> {
+                        thumb_base.rotateZ(position, 0.5f)
+                        thumb_end.rotateZ(position, 0.5f)
+                        thumb_base.translate(0.2f, 0.4f, 0f)
+                        thumb_end.translate(0.2f, 0.4f, 0f)
+                    }
+                    FINGER_INDEX -> {
+                        index_end.rotateX(position, -0.42f)
+                        index_end.translate(0f, 0.3f, 0.74f)
+                        index_mid.rotateX(position, -0.3f)
+                        index_mid.translate(0f, 0.22f, 0.5f)
+                    }
+                    FINGER_MIDDLE -> {
+                        middle_end.rotateX(position, -0.42f)
+                        middle_end.translate(0f, 0.3f, 0.74f)
+                        middle_mid.rotateX(position, -0.3f)
+                        middle_mid.translate(0f, 0.22f, 0.5f)
+                    }
+                    FINGER_RING -> {
+                        ring_end.rotateX(position, -0.42f)
+                        ring_end.translate(0f, 0.3f, 0.74f)
+                        ring_mid.rotateX(position, -0.3f)
+                        ring_mid.translate(0f, 0.22f, 0.5f)
+                    }
+                    FINGER_LITTLE -> {
+                        little_end.rotateX(position, -0.42f)
+                        little_end.translate(0f, 0.3f, 0.74f)
+                        little_mid.rotateX(position, -0.3f)
+                        little_mid.translate(0f, 0.22f, 0.5f)
+                    }
+                }
+            }
+
+            POSTURE_CLOSED -> {
+                when(finger){
+                    FINGER_THUMB -> {
+                        thumb_end.rotate(position, 2.5f, -3.8f, 0f)
+                        thumb_end.translate(-2f, 0.6f, -0.1f)
+                        thumb_base.rotate(position, 2.5f, -3.2f, 0f)
+                        thumb_base.translate(-1.65f, 0.6f, 0.25f)
+                    }
+                    FINGER_INDEX -> {
+                        index_end.rotateX(position, 2.5f)
+                        index_end.translate(0f, 0.8f, -3.2f)
+                        index_mid.rotateX(position, -2.7f)
+                        index_mid.translate(0f, 2.4f, -1.65f)
+                        index_base.rotateX(position, -1.75f)
+                        index_base.translate(0f, 2f, 0f)
+                    }
+                    FINGER_MIDDLE -> {
+                        middle_end.rotateX(position, 2.5f)
+                        middle_end.translate(0f, 0.8f, -3.2f)
+                        middle_mid.rotateX(position, -2.7f)
+                        middle_mid.translate(0f, 2.4f, -1.65f)
+                        middle_base.rotateX(position, -1.75f)
+                        middle_base.translate(0f, 2f, 0f)
+                    }
+                    FINGER_RING -> {
+                        ring_end.rotateX(position, 2.5f)
+                        ring_end.translate(0f, 0.8f, -3.2f)
+                        ring_mid.rotateX(position, -2.7f)
+                        ring_mid.translate(0f, 2.4f, -1.65f)
+                        ring_base.rotateX(position, -1.75f)
+                        ring_base.translate(0f, 2f, 0f)
+                    }
+                    FINGER_LITTLE -> {
+                        little_end.rotateX(position, 2.5f)
+                        little_end.translate(0f, 0.8f, -3.2f)
+                        little_mid.rotateX(position, -2.7f)
+                        little_mid.translate(0f, 2.4f, -1.65f)
+                        little_base.rotateX(position, -1.75f)
+                        little_base.translate(0f, 2f, 0f)
+                    }
+                }
+            }
+
+            /*
+            POSTURE_CLOSED -> {
+                when(finger){
+                    FINGER_THUMB -> {
+                        thumb_end.rotate(-1.2f, 0.1f, 0f)
+                        thumb_end.translate(0.17f, 3.7f, -3.9f)
+                        thumb_base.rotate(-1.2f, 0.1f, 0f)
+                        thumb_base.translate(0.17f, 3.7f, -3.9f)
+                    }
+                    FINGER_INDEX -> {
+                        index_end.rotateX(position, 2.5f)
+                        index_end.translate(0f, 2.2f, -2.4f)
+                        index_mid.rotateX(position, -2.7f)
+                        index_mid.translate(0f, 3f, -0.35f)
+                        index_base.rotateX(position, -1.75f)
+                        index_base.translate(0f, 2f, 1f)
+                    }
+                    FINGER_MIDDLE -> {
+                        middle_end.rotateX(position, 2.5f)
+                        middle_end.translate(0f, 2.2f, -2.4f)
+                        middle_mid.rotateX(position, -2.7f)
+                        middle_mid.translate(0f, 3f, -0.35f)
+                        middle_base.rotateX(position, -1.75f)
+                        middle_base.translate(0f, 2f, 1f)
+                    }
+                    FINGER_RING -> {
+                        ring_end.rotateX(position, 2.5f)
+                        ring_end.translate(0f, 2.2f, -2.4f)
+                        ring_mid.rotateX(position, -2.7f)
+                        ring_mid.translate(0f, 3f, -0.35f)
+                        ring_base.rotateX(position, -1.75f)
+                        ring_base.translate(0f, 2f, 1f)
+                    }
+                    FINGER_LITTLE -> {
+                        little_end.rotateX(position, 2.5f)
+                        little_end.translate(0f, 2.2f, -2.4f)
+                        little_mid.rotateX(position, -2.7f)
+                        little_mid.translate(0f, 3f, -0.35f)
+                        little_base.rotateX(position, -1.75f)
+                        little_base.translate(0f, 2f, 1f)
+                    }
+                }
+            }*/
+        }
+    }
 }

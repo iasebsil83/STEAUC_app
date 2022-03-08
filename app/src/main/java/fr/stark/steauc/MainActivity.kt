@@ -7,6 +7,11 @@ import fr.stark.steauc.log.CodeInfo
 import fr.stark.steauc.log.Error
 import fr.stark.steauc.log.Message
 import fr.stark.steauc.databinding.LyoMainBinding
+import java.util.*
+
+
+//delay before passing to next activity
+const val MAIN_ACTIVITY_DELAY : Long = 3500 //in ms
 
 
 
@@ -19,6 +24,9 @@ class MainActivity : AppCompatActivity() {
 
     //binding
     private lateinit var binding : LyoMainBinding
+
+    //next activity
+    private lateinit var next_activity : Intent
 
 
 
@@ -35,12 +43,16 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
 
-        //BUTTONS
+        //AUTO-MOVE TO NEXT ACTIVITY
 
-        //bind menu button
-        binding.mainStartButton.setOnClickListener{
-            val intent = Intent(this, MenuActivity::class.java)
-            startActivity(intent)
-        }
+        //next activity intent
+        next_activity = Intent(this, MenuActivity::class.java)
+
+        //start activity after a while
+        Timer().schedule(object : TimerTask() {
+            override fun run() {
+                startActivity(next_activity)
+            }
+        }, MAIN_ACTIVITY_DELAY)
     }
 }

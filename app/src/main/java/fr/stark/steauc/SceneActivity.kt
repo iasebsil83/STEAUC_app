@@ -18,7 +18,7 @@ import java.lang.Math.abs
 
 
 //scene refresh
-const val UPDATE_SCENE_DELAY : Long = 100 //in ms
+const val UPDATE_SCENE_DELAY : Long = 800 //in ms
 
 //actions
 val ACTIONS = Ename(mapOf(
@@ -26,10 +26,12 @@ val ACTIONS = Ename(mapOf(
     "ROTATE"    to 1
 ))
 
+//touch event
+const val TOUCH_CEIL  = 10f //in px
+const val TOUCH_SPEED = 0.4f
+
 //steps
-const val TRANS_STEP  = 0.02f
 const val ANGLE_STEP  = 0.09f
-const val SCALE_STEP  = 1.05f
 
 
 
@@ -56,18 +58,22 @@ class SceneActivity : AppCompatActivity(), GestureDetector.OnGestureListener {
     //OpenGL renderer
     private lateinit var scene : GLRenderer
 
-    //actions
-    private var action   = 0
-
     //hand
     private lateinit var steauc : Hand
 
-    //tactil
-    lateinit var gestureDetector: GestureDetector
-    var oldX:Float = 0.0f
-    var newX:Float = 0.0f
-    var oldY:Float = 0.0f
-    var newY:Float = 0.0f
+    //button modes
+    private var thumb_closed  = false
+    private var index_closed  = false
+    private var middle_closed = false
+    private var ring_closed   = false
+    private var little_closed = false
+
+    //touch event
+    private lateinit var gestureDetector: GestureDetector
+    private var oldX = 0f
+    private var newX = 0f
+    private var oldY = 0f
+    private var newY = 0f
 
 
 
@@ -112,25 +118,107 @@ class SceneActivity : AppCompatActivity(), GestureDetector.OnGestureListener {
         //init hand
         steauc = Hand("STEAUC")
 
-        //init default texts
-        binding.sceneSelect.text = "N/A"
-        binding.sceneAction.text = ACTIONS[action]
-
 
 
         //EVENTS
 
-        //bind buttons
-        bindButtonEvents()
+        //button events
+        bindButtons()
 
-
-        // Tactil
+        //touch events
         gestureDetector = GestureDetector(this, this)
     }
 
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
-        gestureDetector.onTouchEvent(event)
 
+
+
+
+
+    //GRAPHICAL SCENE
+
+    //init
+    fun initScene() : Long {
+        msg.function("initScene")
+
+        //hand
+        steauc.addElements(
+            this, scene,
+            px=-0.5f, py=-0.5f, pz=-5f,
+            sx=0.01f, sy=0.01f, sz=0.01f
+        )
+
+        //set hand position
+        steauc.translateY(-1f, updateBuffers=false)
+        steauc.rotateX(-8.8f*ANGLE_STEP)
+
+        //adjust posture
+        steauc.setFingerPosture(FINGER_THUMB,  POSTURE_NORMAL)
+        steauc.setFingerPosture(FINGER_INDEX,  POSTURE_NORMAL)
+        steauc.setFingerPosture(FINGER_MIDDLE, POSTURE_NORMAL)
+        steauc.setFingerPosture(FINGER_RING,   POSTURE_NORMAL)
+        steauc.setFingerPosture(FINGER_LITTLE, POSTURE_NORMAL)
+
+
+        return UPDATE_SCENE_DELAY
+    }
+
+    //loop
+    fun updateScene(){
+    }
+
+
+
+
+
+
+    //EVENTS
+
+    //buttons
+    private fun bindButtons() {
+
+        //finger buttons
+        binding.sceneButtonThumb.setOnClickListener {
+            thumb_closed = !thumb_closed
+            updateHandState()
+        }
+        binding.sceneButtonIndex.setOnClickListener {
+            index_closed = !index_closed
+            updateHandState()
+        }
+        binding.sceneButtonMiddle.setOnClickListener {
+            middle_closed = !middle_closed
+            updateHandState()
+        }
+        binding.sceneButtonRing.setOnClickListener {
+            ring_closed = !ring_closed
+            updateHandState()
+        }
+        binding.sceneButtonLittle.setOnClickListener {
+            little_closed = !little_closed
+            updateHandState()
+        }
+    }
+
+    private fun updateHandState() {
+
+        //reset 3D space
+        scene.resetAll(updateBuffers=false)
+        steauc.resetTrace()
+
+        //set hand position
+        steauc.translateY(-1f, updateBuffers=false)
+        steauc.rotateX(-4*ANGLE_STEP, updateBuffers=false)
+
+        //update posture
+        steauc.setFingerPosture(FINGER_THUMB,  if(thumb_closed)  POSTURE_CLOSED else POSTURE_NORMAL)
+        steauc.setFingerPosture(FINGER_INDEX,  if(index_closed)  POSTURE_CLOSED else POSTURE_NORMAL)
+        steauc.setFingerPosture(FINGER_MIDDLE, if(middle_closed) POSTURE_CLOSED else POSTURE_NORMAL)
+        steauc.setFingerPosture(FINGER_RING,   if(ring_closed)   POSTURE_CLOSED else POSTURE_NORMAL)
+        steauc.setFingerPosture(FINGER_LITTLE, if(little_closed) POSTURE_CLOSED else POSTURE_NORMAL)
+    }
+
+    //touch events
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
         when(event?.action){
 
             // When we start to swipe
@@ -148,105 +236,51 @@ class SceneActivity : AppCompatActivity(), GestureDetector.OnGestureListener {
                 newX = event.x
                 newY = event.y
 
-                val speed = 0.2f
-                var horizonSwipe = 0.0f
-                var verticalSwipe = 0.0f
-                if(abs(oldX-newX) > 20){
-                    horizonSwipe = if ((oldX-newX) > 0.0f) speed else -speed
+                var horizonSwipe  = 0f
+                var verticalSwipe = 0f
+                if(kotlin.math.abs(oldX - newX) > TOUCH_CEIL){
+                    horizonSwipe = if(oldX > newX) TOUCH_SPEED else -TOUCH_SPEED
                 }
-                if(abs(oldY-newY) > 20){
-                    verticalSwipe = if (-(oldY-newY) > 0.0f) -speed else speed
+                if(kotlin.math.abs(oldY - newY) > TOUCH_CEIL){
+                    verticalSwipe = if(newY > oldY) -TOUCH_SPEED else TOUCH_SPEED
                 }
-                steauc.rotate(verticalSwipe, horizonSwipe, 0.0f)
+                steauc.rotate(verticalSwipe, horizonSwipe, 0f)
             }
         }
 
-        return super.onTouchEvent(event)
+        return false
     }
 
-//GRAPHICAL SCENE
-
-    //init
-    fun initScene() : Long {
-        msg.function("initScene")
-
-        //cube
-        scene.addElement(
-            "Cube",
-            PlakObject( Forms.Cube(0.1f), CYAN ),
-            py=0.1f
-        )
-
-        //hand
-        steauc.addElements(
-            this, scene,
-            px=-0.5f, py=-0.5f, pz=-5f,
-            sx=0.01f, sy=0.01f, sz=0.01f
-        )
-
-        //set cam point of view
-        //scene.zoomCam(0.001f, 0.001f, 0.001f)
-        //scene.translateCam(-0.5f, -0.5f, 0f)
-
-        return UPDATE_SCENE_DELAY
+    override fun onDown(e: MotionEvent?): Boolean {
+        return false
     }
 
-    //loop
-    fun updateScene(){
-        msg.function("updateScene")
-
-        //debug
-        //msg.log("Update !")
+    override fun onShowPress(e: MotionEvent?) {
     }
 
-    fun logState() {
-        msg.log("Pos${scene.getCamPos().toStr()}, Rot${scene.getCamRot().toStr()}, Sca${scene.getCamSca().toStr()}.")
+    override fun onSingleTapUp(e: MotionEvent?): Boolean {
+        return false
     }
 
+    override fun onScroll(
+        e1: MotionEvent?,
+        e2: MotionEvent?,
+        distanceX: Float,
+        distanceY: Float
+    ): Boolean {
+        return false
+    }
 
+    override fun onLongPress(e: MotionEvent?) {
+    }
 
-
-
-
-    //EVENTS
-
-    //bind buttons
-    fun bindButtonEvents() {
-
-        //target element & action
-        binding.sceneAction.setOnClickListener {
-            action++
-            if(action >= ACTIONS.length){
-                action = 0
-            }
-            binding.sceneAction.text = ACTIONS[action]
-        }
-
-        //execute movement
-        binding.sceneLeft.setOnClickListener{
-            when(action) {
-                ACTIONS["TRANSLATE"] -> steauc.translateX(-TRANS_STEP)
-                ACTIONS["ROTATE"]    -> steauc.rotateY(-ANGLE_STEP)
-            }
-        }
-        binding.sceneRight.setOnClickListener{
-            when(action) {
-                ACTIONS["TRANSLATE"] -> steauc.translateX(TRANS_STEP)
-                ACTIONS["ROTATE"]    -> steauc.rotateY(ANGLE_STEP)
-            }
-        }
-        binding.sceneDown.setOnClickListener{
-            when(action) {
-                ACTIONS["TRANSLATE"] -> steauc.translateY(-TRANS_STEP)
-                ACTIONS["ROTATE"]    -> steauc.rotateX(-ANGLE_STEP)
-            }
-        }
-        binding.sceneUp.setOnClickListener{
-            when(action) {
-                ACTIONS["TRANSLATE"] -> steauc.translateY(TRANS_STEP)
-                ACTIONS["ROTATE"]    -> steauc.rotateX(ANGLE_STEP)
-            }
-        }
+    override fun onFling(
+        e1: MotionEvent?,
+        e2: MotionEvent?,
+        velocityX: Float,
+        velocityY: Float
+    ): Boolean {
+        return false
     }
 
 
@@ -320,37 +354,5 @@ class SceneActivity : AppCompatActivity(), GestureDetector.OnGestureListener {
                 binding.bleServicesRecView.layoutManager = LinearLayoutManager(this@SceneActivity)
             }
         }
-    }
-
-    override fun onDown(e: MotionEvent?): Boolean {
-        return false
-    }
-
-    override fun onShowPress(e: MotionEvent?) {
-    }
-
-    override fun onSingleTapUp(e: MotionEvent?): Boolean {
-        return false
-    }
-
-    override fun onScroll(
-        e1: MotionEvent?,
-        e2: MotionEvent?,
-        distanceX: Float,
-        distanceY: Float
-    ): Boolean {
-        return false
-    }
-
-    override fun onLongPress(e: MotionEvent?) {
-    }
-
-    override fun onFling(
-        e1: MotionEvent?,
-        e2: MotionEvent?,
-        velocityX: Float,
-        velocityY: Float
-    ): Boolean {
-        return false
     }
 }

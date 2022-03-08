@@ -34,8 +34,8 @@ const val VERTEX_SHADER = """
        vec3 modelViewNormal = vec3(u_MVMatrix * vec4(a_Normal, 0.0));
        float distance       = length(u_LightPos - modelViewVertex);
        vec3 lightVector     = normalize(u_LightPos - modelViewVertex);
-       float diffuse        = max(dot(modelViewNormal, lightVector), 0.1);
-       diffuse              = diffuse * (1.0 / (1.0 + (0.25 * distance * distance)));
+       float diffuse        = 2.0 + max(dot(modelViewNormal, lightVector), 0.1);
+       diffuse              = diffuse * (1.0 / (2.0 + distance));
        v_Color              = a_Color * diffuse;
        gl_Position          = u_MVPMatrix * a_Position;
    }
@@ -114,7 +114,7 @@ class GLRenderer(givenActivity:SceneActivity) : GLSurfaceView.Renderer {
     private val NORM_DATA_SIZE = 3
 
     //light handlers
-    private val lightPosInModelSpace = floatArrayOf(1f, 0f, -2f, 1f) //hold light centered on the origin in model space (4th coord needed -> multiplication with transform matrices
+    private val lightPosInModelSpace = floatArrayOf(1f, 1f, -1f, 10f) //hold light centered on the origin in model space (4th coord needed -> multiplication with transform matrices
     private val lightPosInWorldSpace = FloatArray(4)                   //hold current pos of the light in world space (after transformation via model matrix)
     private val lightPosInEyeSpace   = FloatArray(4)                   //hold the transformed pos of the light in eye space (after transformation via modelview matrix)
 
@@ -450,6 +450,12 @@ class GLRenderer(givenActivity:SceneActivity) : GLSurfaceView.Renderer {
                 rx=rx, ry=ry, rz=rz,
                 sx=sx, sy=sy, sz=sz
             )
+        }
+    }
+
+    fun resetAll(updateBuffers:Boolean=true, trace:Boolean=true) {
+        for(e in elements){
+            e.reset(updateBuffers=updateBuffers, trace=trace)
         }
     }
 

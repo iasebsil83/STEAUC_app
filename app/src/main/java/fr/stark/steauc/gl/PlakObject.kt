@@ -396,7 +396,8 @@ open class PlakObject(plaks:MutableList<Plak>, givenColor:Color) {
         keepPosition:Boolean=false,
         keepRotation:Boolean=false,
         keepScale:Boolean=false,
-        updateBuffers:Boolean=false
+        updateBuffers:Boolean=true,
+        trace:Boolean=true
     ) {
         //reset plakList using defaultPlakList
         for(p in 0 until defaultPlakList.size){
@@ -416,17 +417,17 @@ open class PlakObject(plaks:MutableList<Plak>, givenColor:Color) {
         //restore position/rotation/scale
         if(keepPosition) {
             translate(position, trace=false, updateBuffers=false)
-        }else{
+        }else if(trace) {
             position = XYZ()
         }
         if(keepRotation) {
             rotate(rotation, trace=false, updateBuffers=false)
-        }else{
+        }else if(trace) {
             rotation = XYZ()
         }
         if(keepScale) {
             scale(scale, trace=false, updateBuffers=false)
-        }else{
+        }else if(trace) {
             scale = XYZ()
         }
 

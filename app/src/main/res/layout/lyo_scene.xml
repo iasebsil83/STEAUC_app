@@ -46,75 +46,64 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/scene_select"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/default_text"
-        app:backgroundTint="#7D3B80"
-        app:layout_constraintBottom_toTopOf="@+id/ble_services_rec_view"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.052"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.027" />
-
-    <Button
-        android:id="@+id/scene_action"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/default_text"
-        app:backgroundTint="#7D3B80"
-        app:layout_constraintBottom_toTopOf="@+id/ble_services_rec_view"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.944"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.027" />
-
-    <Button
-        android:id="@+id/scene_down"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/scene_button_down"
-        app:backgroundTint="#7D3B80"
-        app:layout_constraintBottom_toTopOf="@+id/ble_services_rec_view"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/scene_up" />
-
-    <Button
-        android:id="@+id/scene_left"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/scene_button_left"
-        app:backgroundTint="#7D3B80"
-        app:layout_constraintBottom_toTopOf="@+id/ble_services_rec_view"
-        app:layout_constraintEnd_toStartOf="@+id/scene_down"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/scene_up" />
-
-    <Button
-        android:id="@+id/scene_right"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/scene_button_right"
-        app:backgroundTint="#7D3B80"
-        app:layout_constraintBottom_toTopOf="@+id/ble_services_rec_view"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/scene_down"
-        app:layout_constraintTop_toBottomOf="@+id/scene_up" />
-
-    <Button
-        android:id="@+id/scene_up"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/scene_button_up"
-        app:backgroundTint="#7D3B80"
+        android:id="@+id/scene_button_middle"
+        android:layout_width="45dp"
+        android:layout_height="42dp"
+        android:backgroundTint="#582395"
+        android:text="@string/scene_button_middle"
         app:layout_constraintBottom_toTopOf="@+id/ble_services_rec_view"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.871" />
+        app:layout_constraintStart_toStartOf="@+id/opengl_scene"
+        app:layout_constraintTop_toTopOf="@+id/opengl_scene"
+        app:layout_constraintVertical_bias="0.974" />
+
+    <Button
+        android:id="@+id/scene_button_thumb"
+        android:layout_width="45dp"
+        android:layout_height="42dp"
+        android:backgroundTint="#582395"
+        android:text="@string/scene_button_thumb"
+        app:layout_constraintBottom_toTopOf="@+id/ble_services_rec_view"
+        app:layout_constraintEnd_toStartOf="@+id/scene_button_middle"
+        app:layout_constraintStart_toStartOf="@+id/opengl_scene"
+        app:layout_constraintTop_toTopOf="@+id/opengl_scene"
+        app:layout_constraintVertical_bias="0.973" />
+
+    <Button
+        android:id="@+id/scene_button_index"
+        android:layout_width="45dp"
+        android:layout_height="42dp"
+        android:backgroundTint="#582395"
+        android:text="@string/scene_button_index"
+        app:layout_constraintBottom_toTopOf="@+id/ble_services_rec_view"
+        app:layout_constraintEnd_toStartOf="@+id/scene_button_middle"
+        app:layout_constraintStart_toEndOf="@+id/scene_button_thumb"
+        app:layout_constraintTop_toTopOf="@+id/opengl_scene"
+        app:layout_constraintVertical_bias="0.973" />
+
+    <Button
+        android:id="@+id/scene_button_little"
+        android:layout_width="45dp"
+        android:layout_height="42dp"
+        android:backgroundTint="#582395"
+        android:text="@string/scene_button_little"
+        app:layout_constraintBottom_toTopOf="@+id/ble_services_rec_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/scene_button_middle"
+        app:layout_constraintTop_toTopOf="@+id/opengl_scene"
+        app:layout_constraintVertical_bias="0.973" />
+
+    <Button
+        android:id="@+id/scene_button_ring"
+        android:layout_width="45dp"
+        android:layout_height="42dp"
+        android:backgroundTint="#582395"
+        android:text="@string/scene_button_ring"
+        app:layout_constraintBottom_toTopOf="@+id/ble_services_rec_view"
+        app:layout_constraintEnd_toStartOf="@+id/scene_button_little"
+        app:layout_constraintStart_toEndOf="@+id/scene_button_middle"
+        app:layout_constraintTop_toTopOf="@+id/opengl_scene"
+        app:layout_constraintVertical_bias="0.973" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
